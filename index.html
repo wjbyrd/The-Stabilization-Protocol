@@ -3294,18 +3294,451 @@ function getStabilizationProtocolBossLine({ isCorrect, tag, type, objective, str
   return `${bossName}: The Protocol does not reward guesses.`;
 }
 
+
+
+const savedEmail = localStorage.getItem("gauntletEmail");
+const emailInput = document.getElementById("emailInput");
+if (savedEmail && emailInput) emailInput.value = savedEmail;
+function hasSavedGame(mode = "standard"){ return !!localStorage.getItem(`${SAVE_KEY}_${mode}`); }
+function validateAndStoreEmailForModeSelect(){
+    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
+    if (!inputEmail) { alert("An email is required to enter the Protocol."); return false; }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(inputEmail)) { alert("Enter a valid email address."); return false; }
+    studentEmail = inputEmail; username = generatePseudonymFromEmail(studentEmail);
+    localStorage.setItem("gauntletEmail", studentEmail); localStorage.setItem("gauntletUser", username); return true;
+}
+function showModeSelect(){ if(!validateAndStoreEmailForModeSelect()) return; document.getElementById("startScreen").style.display = "none"; const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "flex"; }
+function returnToTitleScreen(){ const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "none"; document.getElementById("startScreen").style.display = "flex"; showContinueButtonIfSaved(); }
+function startSelectedMode(mode){ gameMode = mode || "standard"; localStorage.setItem("stabilizationProtocolCurrentMode", gameMode); const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "none"; if(gameMode === "standard"){ startGame(false); return; } resetRunStateForNewMode(); startGame(false); }
+function returnToModeSelectFromRun(){ stopTimedModeClock(); document.getElementById("gameBox").style.display = "none"; document.getElementById("artifactVault").style.display = "none"; document.querySelector(".top-panel").style.display = "none"; document.getElementById("gameShell").style.display = "none"; const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "flex"; }
+function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Battle Menu?", text:"Standard Campaign progress will be saved. Timed Trial and Exam Drill attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(gameMode === "standard" || gameMode === "legendary") saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
+let activeModalConfirmAction = null; let activeModalCancelAction = null;
+function showGameModal({title="Protocol Warning",text="",confirmText="Continue",cancelText="",onConfirm=null,onCancel=null}={}){ const modal=document.getElementById("gameModal"),titleEl=document.getElementById("gameModalTitle"),textEl=document.getElementById("gameModalText"),confirmBtn=document.getElementById("gameModalConfirm"),cancelBtn=document.getElementById("gameModalCancel"); if(!modal||!titleEl||!textEl||!confirmBtn||!cancelBtn) return; activeModalConfirmAction=onConfirm; activeModalCancelAction=onCancel; titleEl.innerText=title; textEl.innerText=text; confirmBtn.innerText=confirmText; if(cancelText){cancelBtn.innerText=cancelText; cancelBtn.style.display="inline-block";} else cancelBtn.style.display="none"; modal.style.display="flex"; confirmBtn.onclick=function(){const action=activeModalConfirmAction; closeGameModal(); if(typeof action==="function") action();}; cancelBtn.onclick=function(){const action=activeModalCancelAction; closeGameModal(); if(typeof action==="function") action();}; }
+function closeGameModal(){ const modal=document.getElementById("gameModal"); if(modal) modal.style.display="none"; activeModalConfirmAction=null; activeModalCancelAction=null; }
+function endTimedAttemptEarly(){ stopTimedModeClock(); const accuracy=totalAttempts>0?Math.round((correctAnswers/totalAttempts)*100):0; localStorage.setItem("stabilizationProtocolTimedLastRoom",String(room)); localStorage.setItem("stabilizationProtocolTimedLastAccuracy",String(accuracy)); localStorage.setItem("stabilizationProtocolTimedLastAttempts",String(totalAttempts)); localStorage.setItem("stabilizationProtocolTimedLastStreak",String(maxStreak)); const bestRoom=Number(localStorage.getItem("stabilizationProtocolTimedBestRoom")||0); if(room>bestRoom) localStorage.setItem("stabilizationProtocolTimedBestRoom",String(room)); returnToModeSelectFromRun(); }
+function showContinueButtonIfSaved(){ const btn=document.getElementById("continueRunBtn"); if(!btn) return; btn.style.display=hasSavedGame("standard")?"block":"none"; }
+function startNewRun(){ gameMode="standard"; clearSavedGame(); startGame(false); }
+function continueSavedRun(){ gameMode="standard"; startGame(true); }
+showContinueButtonIfSaved();
+// =============================================
+// GAME INITIALIZATION — PARTIAL CUSTOMIZATION
+// =============================================
+// Runs when player starts a new game.
+//
+// Handles:
+// - username setup
+// - full game state reset
+// - UI reveal (game, vault, torches)
+// - restoring unlocked artifacts
+// - starting music and timer
+//
+// ---------------------------------------------
+// SAFE TO EDIT:
+// - alert message text
+// - vault item IDs (Index, Valve, Seal)
+// - visual elements shown/hidden
+//
+// DO NOT MODIFY:
+// - state reset variables (room, streak, etc.)
+// - questionHistory structure
+// - loadQuestion() call
+//
+// Breaking this WILL cause:
+// - corrupted runs
+// - incorrect scoring
+// - progression bugs
+// =============================================
+function startGame(shouldResume = false) {
+    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
+
+    if (!inputEmail) {
+        alert("An email is required to enter the Protocol.");
+        return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(inputEmail)) {
+        alert("Enter a valid email address.");
+        return;
+    }
+
+    studentEmail = inputEmail;
+    username = generatePseudonymFromEmail(studentEmail);
+
+    const hasSavedRun = shouldResume && modeAllowsSave() ? loadSavedGame() : false;
+
+    if(!hasSavedRun){
+        bossCheckpoint = 1;
+        runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    localStorage.setItem("gauntletEmail", studentEmail);
+    localStorage.setItem("gauntletUser", username);
+    localStorage.setItem("gauntletRunID", runID);
+    localStorage.setItem("stabilizationProtocolCurrentMode", gameMode);
+    if(modeAllowsRealmProgress()){
+        localStorage.setItem(REALM_STARTED_KEY, "true");
+        localStorage.setItem(REALM_STATUS_KEY, "contested");
+        localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
+    }
+
+    sendGameData({
+        runID: runID,
+        game: "The Stabilization Protocol",
+        event: hasSavedRun ? "resume" : "start",
+        user: username,
+        email: studentEmail,
+        mode: getModeDisplayName()
+    });
+
+// =============================================
+// RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
+// =============================================
+// Resets all progression, scoring, and adaptive tracking
+    if(!hasSavedRun){
+        room = 1;
+        bossHealth = 3;
+        streak = 0;
+        maxStreak = 0;
+        totalAttempts = 0;
+        correctAnswers = 0;
+        bossPool = [];
+        calcBag = [];
+        conceptMemory = {};
+        masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
+        tagHistory = [];
+        lastTypes = [];
+        adaptiveMode = "support";
+        resetRemediationState();
+        rapidGuessHistory = [];
+        rapidGuessWarnings = 0;
+        rapidGuessLocked = false;
+
+        localStorage.removeItem("gauntletRoom");
+
+        // Stabilization Protocol artifact keys — keep these matched to your actual Stabilization Protocol IDs.
+        localStorage.removeItem("vaultReserveKey");
+        localStorage.removeItem("vaultValuePrism");
+        localStorage.removeItem("vaultPolicyScepter");
+        localStorage.removeItem(REALM_COMPLETE_KEY);
+        localStorage.setItem(REALM_STATUS_KEY, "contested");
+        localStorage.setItem(REALM_ROOM_KEY, "1");
+
+        questionHistory = {
+            easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
+            easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
+        };
+
+        usedQuestions = {
+            easy: [], medium: [], hard: [], elite: [], legendary: [],
+            easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
+        };
+    }
+    
+// =============================================
+// UI INITIALIZATION — SAFE TO CUSTOMIZE
+// =============================================
+// Shows main game elements and restores vault visuals
+    document.getElementById("startScreen").style.display = "none";
+    const modeScreen = document.getElementById("modeSelectScreen");
+    if(modeScreen) modeScreen.style.display = "none";
+    document.querySelector(".top-panel").style.display = "flex";
+    document.getElementById("gameShell").style.display = "flex";
+    document.getElementById("gameBox").style.display = "block";
+    document.getElementById("artifactVault").style.display = "block";
+    document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
+    const timedHud = document.getElementById("timedModeHud");
+    if(timedHud) timedHud.style.display = gameMode === "timed" ? "inline-flex" : "none";
+    if(gameMode === "timed") startTimedModeClock();
+
+   // =============================================
+   // VAULT RESTORE SYSTEM — SAFE WITH MATCHING IDS
+   // =============================================
+   // IMPORTANT:
+   // localStorage keys must match the HTML element ids.
+   // =============================================    
+    if(localStorage.getItem("vaultReserveKey")){
+        document.getElementById("vaultReserveKey").classList.add("unlocked");
+    }
+
+    if(localStorage.getItem("vaultValuePrism")){
+        document.getElementById("vaultValuePrism").classList.add("unlocked");
+    }    
+
+    if(localStorage.getItem("vaultPolicyScepter")){
+        document.getElementById("vaultPolicyScepter").classList.add("unlocked");
+    }
+  
+// Start game loop: music + timer + first question
+    bgMusic.play().catch(e => console.log("Audio started"));
+    startTime = Date.now(); 
+    loadQuestion();
+}
+	 
+
+function resetRunStateForNewMode(){
+    room=1; bossHealth=3; bossPool=[]; bossCheckpoint=1; correctAnswers=0; totalAttempts=0; maxStreak=0; streak=0; conceptMemory={}; masteryState={byTag:{},byObjective:{},bySkill:{},recent:[]}; adaptiveMode="support"; tagHistory=[]; lastTypes=[]; rapidGuessHistory=[]; rapidGuessWarnings=0; rapidGuessLocked=false; timedHighestRoom=1; timedSetbacks=0; resetRemediationState();
+    questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
+    usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
+    if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultReserveKey");localStorage.removeItem("vaultValuePrism");localStorage.removeItem("vaultPolicyScepter");}
+}
+function startTimedModeClock(){
+    timedModeEndTime = Date.now() + timedModeDurationMs;
+
+    const hud = document.getElementById("timedModeHud");
+    if(hud) hud.style.display = "flex";
+
+    updateTimedModeClock();
+
+    if(timedModeTimerInterval){
+        clearInterval(timedModeTimerInterval);
+    }
+
+    timedModeTimerInterval = setInterval(updateTimedModeClock, 250);
+}
+
+function stopTimedModeClock(){
+    if(timedModeTimerInterval){
+        clearInterval(timedModeTimerInterval);
+        timedModeTimerInterval = null;
+    }
+
+    const hud = document.getElementById("timedModeHud");
+    if(hud) hud.style.display = "none";
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    if(timerDisplay){
+        timerDisplay.classList.remove("timer-warning");
+        timerDisplay.innerText = "10:00";
+    }
+}
+
+function updateTimedModeClock(){
+    if(gameMode !== "timed" || !timedModeEndTime) return;
+
+    const remainingMs = Math.max(0, timedModeEndTime - Date.now());
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    if(timerDisplay){
+        timerDisplay.innerText = `${minutes}:${String(seconds).padStart(2, "0")}`;
+        timerDisplay.classList.toggle("timer-warning", remainingMs <= 60 * 1000);
+    }
+
+    if(remainingMs <= 0){
+        endTimedModeRun();
+    }
+}
+
+function endTimedModeRun(){
+    if(gameMode !== "timed") return;
+
+    stopTimedModeClock();
+    gameMode = "timed-complete";
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    const bestRoom = Number(localStorage.getItem("stabilizationProtocolTimedBestRoom") || 0);
+    if(timedHighestRoom > bestRoom){
+        localStorage.setItem("stabilizationProtocolTimedBestRoom", String(timedHighestRoom));
+    }
+
+    localStorage.setItem("stabilizationProtocolTimedLastRoom", String(room));
+    localStorage.setItem("stabilizationProtocolTimedLastHighestRoom", String(timedHighestRoom));
+    localStorage.setItem("stabilizationProtocolTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("stabilizationProtocolTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("stabilizationProtocolTimedLastStreak", String(maxStreak));
+    localStorage.setItem("stabilizationProtocolTimedLastSetbacks", String(timedSetbacks));
+
+    sendGameData({
+        runID: runID,
+        game: "The Stabilization Protocol",
+        event: "timed_complete",
+        user: username,
+        email: studentEmail,
+        room: room,
+        questionId: 0,
+        correct: 1,
+        tag: "",
+        type: "",
+        objective: "",
+        responseTime: 0,
+        attempt: totalAttempts,
+        streak: streak,
+        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        adaptiveMode: "timed_complete",
+        totalTime: timedModeDurationMs,
+        accuracy: accuracy / 100,
+        maxStreak: maxStreak,
+        totalAttempts: totalAttempts
+    });
+
+    document.getElementById("bossMessage").innerText = "";
+    document.getElementById("formulaHint").innerText = "";
+    document.getElementById("artifactDrop").style.display = "none";
+    document.getElementById("questionImageBox").style.display = "none";
+
+    document.getElementById("question").innerHTML = `
+        <span class="boss-title">TIME EXPIRED</span>
+        <div class="boss-q">
+            You reached as far as Room ${timedHighestRoom}.<br><br>
+            Final Room: ${room}<br>
+            Accuracy: ${accuracy}%<br>
+            Total Attempts: ${totalAttempts}<br>
+            Best Streak: ${maxStreak}<br>
+            Setbacks Taken: ${timedSetbacks}
+        </div>
+    `;
+
+    document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
+        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
+    `;
+
+    document.getElementById("message").innerText = "The trial ends. The Protocol records the result.";
+}
+
+function restartTimedMode(){
+    gameMode = "timed";
+    resetRunStateForNewMode();
+    startSelectedMode("timed");
+}
+function getDifficultyForMode(){if(gameMode==="exam"||gameMode==="timed")return(room<=10)?"easy":(room<=20)?"medium":"hard";if(gameMode==="legendary")return(room===10||room===20||room===30)?"legendaryBoss":"legendary";return(room<=9)?"easy":(room===10)?"easyBoss":(room<=19)?"medium":(room===20)?"mediumBoss":(room<=29)?"hard":"finalBoss";}
+
+// =============================================
+// INPUT SHORTCUT — SAFE TO KEEP OR REMOVE
+// =============================================
+// Allows pressing Enter to start the game
+// Improves usability, does not affect logic
+// =============================================
+document.getElementById("emailInput").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+
+        if(hasSavedGame("standard")){
+            continueSavedRun();
+        } else {
+            showModeSelect();
+        }
+    }
+});
+
+// =============================================
+// AREA NAMING SYSTEM — SAFE TO CUSTOMIZE (WITH RULES)
+// =============================================
+// Maps room numbers → area names (display only)
+//
+// SAFE TO EDIT:
+// - area names (theme, tone, subject)
+// - text flavor
+//
+// DO NOT MODIFY:
+// - room number structure (<=9, ===10, etc.)
+// unless you also update:
+//   - boss rooms (10, 20, 30)
+//   - progression logic elsewhere
+//
+// This affects UI only, not game logic.
+// =============================================
+function getAreaName(r) {
+    if (r <= 9) return "Stabilization Briefing Corridor";
+    if (r === 10) return "The Policy Sentinel’s Chamber";
+    if (r <= 19) return "AD-AS Stabilization Wing";
+    if (r === 20) return "The Expectations Warden’s Gate";
+    if (r <= 25) return "Fiscal-Monetary Transmission Floor";
+    if (r <= 29) return "Phillips Curve Tribunal";
+    return "The Chancellor’s Final Chamber";
+}
+
+// =============================================
+// WIZARD DIALOGUE SYSTEM — SAFE TO CUSTOMIZE
+// =============================================
+const wizardFeedback = {
+    correct: [
+        "The Protocol accepts this memo.",
+        "Clean stabilization logic.",
+        "The policy chain holds.",
+        "Approved. Keep moving.",
+        "That judgment survives pressure."
+    ],
+    wrong: [
+        "The Protocol rejects that memo.",
+        "That policy chain breaks.",
+        "No. That answer destabilizes the system.",
+        "Bad signal. Correct the diagnosis.",
+        "The Chancellor is not signing that nonsense."
+    ]
+};
+
+const wizardLines = {
+    definition: [
+        "Define the policy term precisely.",
+        "No vague memo language.",
+        "Classify the concept cleanly.",
+        "Start with the correct definition."
+    ],
+    interpretation: [
+        "Read the shock path.",
+        "Trace the adjustment.",
+        "Judge the policy signal.",
+        "Separate the short run from the long run."
+    ],
+    trap: [
+        "This is where lazy answers die.",
+        "Do not fall for the obvious trap.",
+        "The wording is trying to bait you.",
+        "Check the assumption before you answer.",
+        "Policy memos fail right here."
+    ],
+    calculation: [
+        "Calculate before you commit.",
+        "Run the numbers.",
+        "The multiplier will not guess for you.",
+        "Make the implied value explicit."
+    ],
+    "multi-step": [
+        "Trace every link in the chain.",
+        "One step is not enough.",
+        "Policy logic moves in sequence.",
+        "Follow the shock through the system."
+    ],
+    integration: [
+        "Connect the chapters.",
+        "Bring money, AD-AS, and expectations together.",
+        "This is final-protocol synthesis.",
+        "Judge the whole system, not one curve."
+    ],
+    default: [
+        "Answer.",
+        "Proceed.",
+        "Enter your judgment.",
+        "Commit to the memo."
+    ]
+};
+
+function getWizardLine(type){
+    const pool = wizardLines[type] || wizardLines.default;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function getWizardFeedback(type){
-    const pool = wizardFeedback[type];
+    const pool = wizardFeedback[type] || wizardFeedback.default || wizardFeedback.correct;
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // Updates on-screen message text
-// Requires element with id="message"     
+// Requires element with id="message"
 function wizardSpeak(text){
     const msg = document.getElementById("message");
-    msg.innerText = text;
-}     
-    
+    if(msg) msg.innerText = text;
+}
+
 // =============================================
 // QUESTION BANKS — PRIMARY EDIT AREA
 // =============================================
@@ -5666,6 +6099,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
