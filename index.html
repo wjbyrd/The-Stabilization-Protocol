@@ -4603,102 +4603,84 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
     document.getElementById("areaDisplay").innerText = `${getAreaName(room)} (${room}/30)`;
     document.getElementById("srAnnouncements").innerText = `Entering ${getAreaName(room)}. Room ${room} of 30.`;
 
-    // 3. Select the Question (CHANGE BOSS NAMES AND PNG)
-   if(isBoss){
-   if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
-    const bank = [...questionBanks[diff]];
-    let chosenTag = getWeakestTag();
+   // 3. Select the Question
+if (isBoss) {
+    // 1. If it's a new fight, build a boss question set
+    if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
+        const bank = [...questionBanks[diff]];
+        let chosenTag = getWeakestTag();
 
-    let candidates = chosenTag
-        ? bank.filter(q => q.tag === chosenTag)
-        : [];
+        const bossTags = [...new Set(bank.map(q => q.tag))];
 
-    if (candidates.length < 3) {
-        candidates = bank.filter(q => {
-            if (!q) return false;
-            if (usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
-            return true;
-        });
+        const eligibleTags = bossTags.filter(tag =>
+            bank.filter(q => q.tag === tag).length >= 3
+        );
+
+        let candidatePool = chosenTag
+            ? bank.filter(q => q.tag === chosenTag)
+            : [];
+
+        // If the selected weak tag does not support a full boss set,
+        // choose a valid boss theme instead.
+        if (candidatePool.length < 3) {
+            const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
+            candidatePool = bank.filter(q => q.tag === randomTag);
+        }
+
+        bossPool = shuffle([...candidatePool]).slice(0, 3);
     }
 
-    if (candidates.length < 3) {
-        if (usedQuestions[diff]) usedQuestions[diff] = [];
-        candidates = [...bank];
+    // 2. Select the specific question based on boss health
+    currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
+
+    if(currentQuestion.image){
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.style.display = "block";
     }
 
-    bossPool = shuffle([...candidates]).slice(0, 3);
+    // 3. Boss Identity UI — Stabilization Protocol
+    let bTitle = room === 10 ? "THE POLICY SENTINEL"
+        : room === 20 ? "THE STABILIZATION WARDEN"
+        : "THE CHANCELLOR";
 
-    if (usedQuestions[diff]) {
-        bossPool.forEach(q => {
-            if (q && !usedQuestions[diff].includes(q.id)) {
-                usedQuestions[diff].push(q.id);
-            }
-        });
-    }
-}
+    let bColor = room === 10 ? "#38bdf8"
+        : room === 20 ? "#f8d981"
+        : "#fff8e7";
 
-        // 2. Select the specific question based on boss health
-        currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
+    document.getElementById("srAnnouncements").innerText =
+        `Boss encounter. ${bTitle}. Prepare yourself`;
 
-		if(currentQuestion.image){
-   		imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
-   		imageBox.style.display = "block";
-		}
+    bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
+    bossMsg.style.color = bColor;
+    gameBox.style.setProperty('--bossColor', bColor);
 
-       // 3. Boss Identity UI (Logic moved ABOVE the return)
-        let bTitle = room === 10 ? "THE OUTPUT ARBITER"
-               : room === 20 ? "THE EXPECTATIONS WARDEN"
-               : "THE SACRIFICE MARSHAL";
+    let bossImage = "";
+    let bossClass = "";
 
-       let bColor = room === 10 ? "#f8d981"
-               : room === 20 ? "#fff8e7"
-               : "#d4af37";
-       
-        document.getElementById("srAnnouncements").innerText =`Boss encounter. ${bTitle}. Prepare yourself`;
-        bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
-        bossMsg.style.color = bColor;
-        gameBox.style.setProperty('--bossColor', bColor);
-		
-        let bossImage = "";
-        let bossClass = "";
-
-// =============================================
-// BOSS VISUAL CONFIGURATION — SAFE TO EDIT
-// =============================================
-// Change:
-// - boss images
-// - boss class
-//
-// Keep room numbers (10, 20, 30) intact.
-// =============================================
-        
     if(room === 10){
-        bossImage = "boss_one_pending.png";
-        bossClass = "arbiterGlow";
+        bossImage = "policy_sentinel.png";
+        bossClass = "sentinelGlow";
     }
     else if(room === 20){
-        bossImage = "boss_two_pending.png";
-        bossClass = "expectationsGlow";
+        bossImage = "stabilization_warden.png";
+        bossClass = "wardenGlow";
     }
     else{
-        bossImage = "the_chancellor.png";
+        bossImage = "chancellor.png";
         bossClass = "chancellorGlow";
     }
 
-        questionElement.innerHTML = `
-            <img src="${bossImage}" class="bossIcon ${bossClass}">
-            <span class="boss-title" style="color:${bColor}">${bTitle}</span>
-            <div class="boss-q" style="--bossColor:${bColor}">
-                ${currentQuestion.q}
-            </div>`;
+    questionElement.innerHTML = `
+        <img src="${bossImage}" class="bossIcon ${bossClass}">
+        <span class="boss-title" style="color:${bColor}">${bTitle}</span>
+        <div class="boss-q" style="--bossColor:${bColor}">
+            ${currentQuestion.q}
+        </div>`;
 
-        // 4. THE CORRECT PLACEMENT OF RETURN
-        // We draw the UI first, THEN we exit the function.
-        displayQuestion(); 
-        return; 
+    displayQuestion();
+    return;
 
-    } else {
-
+} else {
     // --- STREAK + MASTERY ADAPTIVE LOGIC ---
     let adjustedDiff = diff;
     const profile = getSelectionProfile();
