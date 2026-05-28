@@ -1893,7 +1893,22 @@ TIP:
     min-height:360px;
     padding:30px 20px;
     text-align:center;
+    animation: chancellorIntroIn .65s ease forwards;
+}
+
+.chancellor-suspense{
     animation: chancellorIntroFade 5s ease forwards;
+}
+
+@keyframes chancellorIntroIn{
+    0%{
+        opacity:0;
+        transform:scale(0.97);
+    }
+    100%{
+        opacity:1;
+        transform:scale(1);
+    }
 }
 
 .chancellor-intro .bossIcon{
@@ -2090,15 +2105,15 @@ or simplify this section.
         <div id="artifactVault">
             <h3>Artifacts</h3>
             <div class="vaultRow">
-                <div id="vaultReserveKey" class="artifactSlot">
+                <div id="vaultPolicyKey" class="artifactSlot">
                     <img src="key.png" alt="Policy Key">
                     <span>The Policy Key</span>
                 </div>
-                <div id="vaultValueSeal" class="artifactSlot">
+                <div id="vaultRegentsSeal" class="artifactSlot">
                     <img src="seal.png" alt="The Regent's Seal">
                     <span>The Regent's Seal</span>
                 </div>
-                <div id="vaultPolicyMandate" class="artifactSlot">
+                <div id="vaultChancellorsMandate" class="artifactSlot">
                     <img src="mandate.png" alt="The Chancellor's Mandate">
                     <span>The Chancellor's Mandate</span>
                 </div>
@@ -2391,10 +2406,10 @@ function saveGameState(){
         rapidGuessLocked,
         savedAt: Date.now(),
 
-        artifacts: {
-            vaultReserveKey: localStorage.getItem("vaultReserveKey") === "true",
-            vaultValuePrism: localStorage.getItem("vaultValuePrism") === "true",
-            vaultPolicyScepter: localStorage.getItem("vaultPolicyScepter") === "true"
+		artifacts: {
+ 		   vaultPolicyKey: localStorage.getItem("vaultPolicyKey") === "true",
+  		   vaultRegentSeal: localStorage.getItem("vaultRegentSeal") === "true",
+   		   vaultChancellorsMandate: localStorage.getItem("vaultChancellorsMandate") === "true"
         }
     };
 
@@ -2445,9 +2460,9 @@ function loadSavedGame(){
         rapidGuessWarnings = Number(saveData.rapidGuessWarnings || 0);
         rapidGuessLocked = !!saveData.rapidGuessLocked;
 
-        if(saveData.artifacts?.vaultReserveKey) localStorage.setItem("vaultReserveKey", "true");
-        if(saveData.artifacts?.vaultValuePrism) localStorage.setItem("vaultValuePrism", "true");
-        if(saveData.artifacts?.vaultPolicyScepter) localStorage.setItem("vaultPolicyScepter", "true");
+        if(saveData.artifacts?.vaultPolicyKey) localStorage.setItem("vaultPolicyKey", "true");
+		if(saveData.artifacts?.vaultRegentSeal) localStorage.setItem("vaultRegentSeal", "true");
+		if(saveData.artifacts?.vaultChancellorsMandate) localStorage.setItem("vaultChancellorsMandate", "true");
 
         return true;
     } catch(error){
@@ -2461,9 +2476,9 @@ function clearSavedGame(){
     localStorage.removeItem(getSaveKey());
     if(modeAllowsSave()){
         localStorage.removeItem("gauntletRoom");
-        localStorage.removeItem("vaultReserveKey");
-        localStorage.removeItem("vaultValuePrism");
-        localStorage.removeItem("vaultPolicyScepter");
+        localStorage.removeItem("vaultPolicyKey");
+        localStorage.removeItem("vaultRegentSeal");
+        localStorage.removeItem("vaultChancellorsMandate");
     }
 }
 
@@ -3286,23 +3301,23 @@ const TIMING = {
 // Do NOT remove bossHealth logic.
      
 const artifacts = {
-reserveKey:{
+const artifacts = {
+policyKey:{
     img:"key.png",
-    title:"he Policy Key",
+    title:"The Policy Key",
     text:"The Policy Key unlocks the first layer of the Protocol: money, reserves, Fed tools, interest-rate control, and the policy channels that move through the economy."
 },
-valuePrism:{
+regentSeal:{
     img:"seal.png",
     title:"The Regent’s Seal",
     text:"The Regent’s Seal marks command over stabilization tradeoffs: AD-AS shocks, liquidity preference, fiscal and monetary policy, multiplier effects, crowding out, expectations, and the risks of trying to force balance."
 },
-policyScepter:{
+chancellorsMandate:{
     img:"mandate.png",
     title:"The Chancellor’s Mandate",
     text:"The Chancellor’s Mandate restores final authority over the Protocol: inflation, unemployment, Phillips-curve tradeoffs, expectations, disinflation, sacrifice ratios, and full policy judgment."
 }
 };
-
 
 function getRecoveryLine(stage){
   if(stage === "repair"){
@@ -3538,16 +3553,16 @@ function startGame(shouldResume = false) {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-    if(localStorage.getItem("vaultReserveKey")){
-        document.getElementById("vaultReserveKey").classList.add("unlocked");
+    if(localStorage.getItem("vaultPolicyKey")){
+        document.getElementById("vaultPolicyKey").classList.add("unlocked");
     }
 
-    if(localStorage.getItem("vaultValuePrism")){
-        document.getElementById("vaultValuePrism").classList.add("unlocked");
+    if(localStorage.getItem("vaultRegentSeal")){
+        document.getElementById("vaultRegentSeal").classList.add("unlocked");
     }    
 
-    if(localStorage.getItem("vaultPolicyScepter")){
-        document.getElementById("vaultPolicyScepter").classList.add("unlocked");
+    if(localStorage.getItem("vaultChancellorsMandate")){
+        document.getElementById("vaultChancellorsMandate").classList.add("unlocked");
     }
   
 // Start game loop: music + timer + first question
@@ -3618,7 +3633,7 @@ function showChancellorSuspenseIntro(){
     const gameBox = document.getElementById("gameBox");
     const questionElement = document.getElementById("question");
     const answersElement = document.getElementById("answers");
-    const bossMsg = document.getElementById("bossMsg");
+    const bossMsg = document.getElementById("bossMessage");
     const imageBox = document.getElementById("questionImageBox");
 
     if (answersElement) answersElement.innerHTML = "";
@@ -3655,7 +3670,26 @@ function showChancellorSuspenseIntro(){
 	 
 
 function resetRunStateForNewMode(){
-    room=1; bossHealth=3; bossPool=[]; bossCheckpoint=1; correctAnswers=0; totalAttempts=0; maxStreak=0; streak=0; conceptMemory={}; masteryState={byTag:{},byObjective:{},bySkill:{},recent:[]}; adaptiveMode="support"; tagHistory=[]; lastTypes=[]; rapidGuessHistory=[]; rapidGuessWarnings=0; rapidGuessLocked=false; timedHighestRoom=1; timedSetbacks=0; resetRemediationState();
+    room=1;
+bossHealth=3;
+bossPool=[];
+bossCheckpoint=1;
+correctAnswers=0;
+totalAttempts=0;
+maxStreak=0;
+streak=0;
+conceptMemory={};
+masteryState={byTag:{},byObjective:{},bySkill:{},recent:[]};
+adaptiveMode="support";
+tagHistory=[];
+lastTypes=[];
+rapidGuessHistory=[];
+rapidGuessWarnings=0;
+rapidGuessLocked=false;
+timedHighestRoom=1;
+timedSetbacks=0;
+chancellorIntroPlayed=false;
+resetRemediationState();
     questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
     usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
     if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultReserveKey");localStorage.removeItem("vaultValuePrism");localStorage.removeItem("vaultPolicyScepter");}
@@ -5152,19 +5186,19 @@ if(remediationState.active){
     if(room === 10){
         document.getElementById("vaultReserveKey").classList.add("unlocked");
         localStorage.setItem("vaultReserveKey", "true");
-        showArtifact(artifacts.reserveKey.img, artifacts.reserveKey.title, artifacts.reserveKey.text);
+        showArtifact(artifacts.policyKey.img, artifacts.policyKey.title, artifacts.policyKey.text);
     }
 
     if(room === 20){
-        document.getElementById("vaultValuePrism").classList.add("unlocked");
-        localStorage.setItem("vaultValuePrism", "true");
-        showArtifact(artifacts.valuePrism.img, artifacts.valuePrism.title, artifacts.valuePrism.text);
+        document.getElementById("vaultRegentsSeal").classList.add("unlocked");
+        localStorage.setItem("vaultRegentsSeal", "true");
+        showArtifact(artifacts.regentsSeal.img, artifacts.regentsSeal.title, artifacts.regentsSeal.text);
     }
 
     if(room === 30){
-        document.getElementById("vaultPolicyScepter").classList.add("unlocked");
-        localStorage.setItem("vaultPolicyScepter", "true");
-        showArtifact(artifacts.policyScepter.img, artifacts.policyScepter.title, artifacts.policyScepter.text);
+        document.getElementById("vaultChancellorsMandate").classList.add("unlocked");
+        localStorage.setItem("vaultChancellorsMandate", "true");
+        showArtifact(artifacts.chancellorsMandate.img, artifacts.chancellorsMandate.title, artifacts.chancellorsMandate.text);
     }
 }
 
