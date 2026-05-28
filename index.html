@@ -2014,16 +2014,16 @@ or simplify this section.
             <h3>Artifacts</h3>
             <div class="vaultRow">
                 <div id="vaultReserveKey" class="artifactSlot">
-                    <img src="artifact_one_pending.png" alt="Artifact I Placeholder">
-                    <span>Artifact I</span>
+                    <img src="key.png" alt="Policy Key">
+                    <span>The Policy Key</span>
                 </div>
-                <div id="vaultValuePrism" class="artifactSlot">
-                    <img src="artifact_two_pending.png" alt="Artifact II Placeholder">
-                    <span>Artifact II</span>
+                <div id="vaultValueSeal" class="artifactSlot">
+                    <img src="seal.png" alt="The Regent's Seal">
+                    <span>The Regent's Seal</span>
                 </div>
-                <div id="vaultPolicyScepter" class="artifactSlot">
-                    <img src="artifact_three_pending.png" alt="Artifact III Placeholder">
-                    <span>Artifact III</span>
+                <div id="vaultPolicyMandate" class="artifactSlot">
+                    <img src="mandate.png" alt="The Chancellor's Mandate">
+                    <span>The Chancellor's Mandate</span>
                 </div>
             </div>
         </div>
@@ -2034,8 +2034,8 @@ or simplify this section.
     <div class="main-panel">
         <div id="gameShell">
             <div id="wizardBox">
-                <div id="wizardName">Protocol Advisor</div>
-                <img src="protocol_advisor.png" id="wizardImage">
+                <div id="wizardName">Chancellor</div>
+                <img src="chancellor.png" id="wizardImage">
             </div>
 
             <!-- GAME -->
@@ -3209,19 +3209,19 @@ const TIMING = {
      
 const artifacts = {
 reserveKey:{
-    img:"artifact_one_pending.png",
-    title:"Artifact I: Monetary Anchor",
-    text:"Placeholder artifact. This first reward marks the foundation layer: money, reserves, Fed tools, the value of money, inflation, and the nominal-real split. Rename once the final artifact set is chosen."
+    img:"key.png",
+    title:"he Policy Key",
+    text:"The Policy Key unlocks the first layer of the Protocol: money, reserves, Fed tools, interest-rate control, and the policy channels that move through the economy."
 },
 valuePrism:{
-    img:"artifact_two_pending.png",
-    title:"Artifact II: Stabilization Lens",
-    text:"Placeholder artifact. This second reward marks the stabilization layer: AD-AS shocks, liquidity preference, monetary policy, fiscal policy, multiplier effects, and crowding out. Rename once the final artifact set is chosen."
+    img:"seal.png",
+    title:"The Regent’s Seal",
+    text:"The Regent’s Seal marks command over stabilization tradeoffs: AD-AS shocks, liquidity preference, fiscal and monetary policy, multiplier effects, crowding out, expectations, and the risks of trying to force balance."
 },
 policyScepter:{
-    img:"artifact_three_pending.png",
-    title:"Artifact III: Chancellor's Seal",
-    text:"Placeholder artifact. This final reward marks the Chancellor layer: Phillips-curve tradeoffs, expectations, disinflation, sacrifice ratios, and final policy judgment. Rename once the final artifact set is chosen."
+    img:"mandate.png",
+    title:"The Chancellor’s Mandate",
+    text:"The Chancellor’s Mandate restores final authority over the Protocol: inflation, unemployment, Phillips-curve tradeoffs, expectations, disinflation, sacrifice ratios, and full policy judgment."
 }
 };
 
@@ -3247,8 +3247,8 @@ function getRecoveryLine(stage){
 }
 
 function getStabilizationProtocolBossName(){
-  if(room === 10) return "Protocol Sentinel"; // placeholder until Boss I is named
-  if(room === 20) return "Stabilization Warden"; // placeholder until Boss II is named
+  if(room === 10) return "Protocol Sentinel"; 
+  if(room === 20) return "Stabilization Regent"; 
   if(room === 30) return "The Chancellor";
   return "The Stabilization Protocol";
 }
@@ -3650,7 +3650,7 @@ function getAreaName(r) {
     if (r <= 9) return "Stabilization Briefing Corridor";
     if (r === 10) return "The Policy Sentinel’s Chamber";
     if (r <= 19) return "AD-AS Stabilization Wing";
-    if (r === 20) return "The Expectations Warden’s Gate";
+    if (r === 20) return "The Stabilization Regent's Gate";
     if (r <= 25) return "Fiscal-Monetary Transmission Floor";
     if (r <= 29) return "Phillips Curve Tribunal";
     return "The Chancellor’s Final Chamber";
@@ -4493,7 +4493,7 @@ if (isBoss) {
 
     // 3. Boss Identity UI — Stabilization Protocol
     let bTitle = room === 10 ? "THE POLICY SENTINEL"
-        : room === 20 ? "THE STABILIZATION WARDEN"
+        : room === 20 ? "THE STABILIZATION REGENT"
         : "THE CHANCELLOR";
 
     let bColor = room === 10 ? "#38bdf8"
@@ -4515,8 +4515,8 @@ if (isBoss) {
         bossClass = "sentinelGlow";
     }
     else if (room === 20) {
-        bossImage = "stabilization_warden.png";
-        bossClass = "wardenGlow";
+        bossImage = "stabilization_regent.png";
+        bossClass = "regentGlow";
     }
     else {
         bossImage = "chancellor.png";
@@ -5181,22 +5181,22 @@ function unlockArtifact(key) {
 //
 // Keep variable "streak" intact.
 // =============================================
- function handleStreakVisuals() {
+function handleStreakVisuals() {
     let streakMsg = "";
     let streakColor = "#f8d981";
 
-if (streak === 5) {
-    streakMsg = `<span class="streak"><img src="streakspark.png" class="streak-icon">OUTPUT SPARK</span>`;
-    streakColor = "#38bdf8";
-}
-else if (streak === 10) {
-    streakMsg = `<span class="streak"><img src="streakpulse.png" class="streak-icon">EXPECTATIONS PULSE</span>`;
-    streakColor = "#60a5fa";
-}
-else if (streak === 20) {
-    streakMsg = `<span class="streak"><img src="streakbeacon.png" class="streak-icon">STABILIZATION BEACON</span>`;
-    streakColor = "#f8d981";
-}
+    if (streak === 5) {
+        streakMsg = `<span class="streak"><img src="streakspark.png" class="streak-icon">POLICY SPARK</span>`;
+        streakColor = "#38bdf8";
+    }
+    else if (streak === 10) {
+        streakMsg = `<span class="streak"><img src="streakpulse.png" class="streak-icon">STABILIZATION PULSE</span>`;
+        streakColor = "#60a5fa";
+    }
+    else if (streak === 20) {
+        streakMsg = `<span class="streak"><img src="streakbeacon.png" class="streak-icon">MANDATE BEACON</span>`;
+        streakColor = "#f8d981";
+    }
 
     if (streakMsg) {
         sfxMilestone.currentTime = 0;
@@ -5207,7 +5207,7 @@ else if (streak === 20) {
         document.getElementById("streakDisplay").innerText = `Streak: ${streak}`;
         document.getElementById("streakDisplay").style.color = "#f8d981";
     }
-}  
+}
 
 // =============================================
 // TRANSITION SCREEN — SAFE TO CUSTOMIZE
