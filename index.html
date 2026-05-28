@@ -4434,9 +4434,9 @@ function updateMazeTrack() {
             box.innerText = "🟨";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="output_arbiter.png" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="expectations_warden.png" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="sacrifice_marshal.png" class="boss-icon">';box.classList.add("boss30");}
+            if (i === 10){box.innerHTML = '<img src="sentinel.png" class="boss-icon">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="regent.png" class="boss-icon">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="chancellor.png" class="boss-icon">';box.classList.add("boss30");}
             else box.innerText = "⬛";
         }
         
@@ -4726,11 +4726,11 @@ if (isBoss) {
     let bossClass = "";
 
     if (room === 10) {
-        bossImage = "policy_sentinel.png";
+        bossImage = "sentinel.png";
         bossClass = "sentinelGlow";
     }
     else if (room === 20) {
-        bossImage = "stabilization_regent.png";
+        bossImage = "regent.png";
         bossClass = "regentGlow";
     }
     else {
