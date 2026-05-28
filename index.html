@@ -3556,7 +3556,65 @@ function startGame(shouldResume = false) {
     loadQuestion();
 }
 
-function showChancellorIntro(){
+function beginChancellorTrial(){
+    loadQuestion();
+}
+	
+function showChancellorIntro(step = 1){
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+
+    if (answersElement) answersElement.innerHTML = "";
+
+    if (step === 1) {
+        questionElement.innerHTML = `
+            <div class="chancellor-intro">
+                <img src="chancellor.png" class="bossIcon chancellorGlow">
+                <div class="chancellor-intro-title">THE CHANCELLOR</div>
+
+                <div class="chancellor-dialogue">
+                    You have proven yourself well.
+                    <br><br>
+                    I have been observing you this entire time.
+                    Watching your decisions, analyzing your calculations, scrutinizing your policy stances.
+                    <br><br>
+                    You restored four systems and made your way to me.
+                </div>
+
+                <div class="chancellor-intro-actions">
+                    <button onclick="beginChancellorTrial()" class="chancellor-skip-btn">Skip</button>
+                    <button onclick="showChancellorIntro(2)" class="chancellor-begin-btn">Continue</button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    questionElement.innerHTML = `
+        <div class="chancellor-intro">
+            <img src="chancellor.png" class="bossIcon chancellorGlow">
+            <div class="chancellor-intro-title">THE CHANCELLOR</div>
+
+            <div class="chancellor-dialogue">
+                To show that you truly understand macro policy, you must face a final trial.
+                <br><br>
+                One that is not about naming the tool.
+                <br>
+                It is about judging the consequence.
+                <br><br>
+                Every lever has a cost.
+                Every answer carries a tradeoff.
+            </div>
+
+            <div class="chancellor-intro-actions">
+                <button onclick="beginChancellorTrial()" class="chancellor-skip-btn">Skip</button>
+                <button onclick="beginChancellorTrial()" class="chancellor-begin-btn">Begin Final Trial</button>
+            </div>
+        </div>
+    `;
+}
+
+function showChancellorSuspenseIntro(){
     const gameBox = document.getElementById("gameBox");
     const questionElement = document.getElementById("question");
     const answersElement = document.getElementById("answers");
@@ -3564,29 +3622,34 @@ function showChancellorIntro(){
     const imageBox = document.getElementById("questionImageBox");
 
     if (answersElement) answersElement.innerHTML = "";
+
     if (imageBox) {
         imageBox.innerHTML = "";
         imageBox.style.display = "none";
     }
 
-    bossMsg.innerText = "⚠ FINAL DIRECTIVE DETECTED ⚠";
-    bossMsg.style.color = "#fff8e7";
-    gameBox.style.setProperty("--bossColor", "#fff8e7");
-    gameBox.classList.add("boss-mode");
+    if (bossMsg) {
+        bossMsg.innerText = "⚠ FINAL DIRECTIVE DETECTED ⚠";
+        bossMsg.style.color = "#fff8e7";
+    }
 
-    questionElement.innerHTML = `
-        <div class="chancellor-intro">
-            <img src="chancellor.png" class="bossIcon chancellorGlow">
-            <div class="chancellor-intro-title">THE CHANCELLOR</div>
-            <div class="chancellor-intro-line">The final directive is now active.</div>
-            <div class="chancellor-intro-subline">Stand by. Policy judgment will be tested.</div>
-        </div>
-    `;
+    if (gameBox) {
+        gameBox.style.setProperty("--bossColor", "#fff8e7");
+        gameBox.classList.add("boss-mode");
+    }
 
     playFinalBossMusic();
 
+    questionElement.innerHTML = `
+        <div class="chancellor-intro chancellor-suspense">
+            <img src="chancellor.png" class="bossIcon chancellorGlow">
+            <div class="chancellor-intro-title">THE CHANCELLOR</div>
+            <div class="chancellor-intro-line">Final authority recognized.</div>
+        </div>
+    `;
+
     setTimeout(() => {
-        loadQuestion();
+        showChancellorIntro(1);
     }, 5000);
 }
 	 
@@ -4545,11 +4608,12 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
 
   // 3. Select the Question
 if (isBoss) {
-	if (room === 30 && bossHealth === 3 && !chancellorIntroPlayed) {
-       chancellorIntroPlayed = true;
-       showChancellorIntro();
-       return;
+    if (room === 30 && bossHealth === 3 && !chancellorIntroPlayed) {
+        chancellorIntroPlayed = true;
+        showChancellorSuspenseIntro();
+        return;
     }
+	
     // 1. If it's a new fight, build a three-question boss pool
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
         const bank = [...questionBanks[diff]];
