@@ -2406,11 +2406,11 @@ function saveGameState(){
         rapidGuessLocked,
         savedAt: Date.now(),
 
-		artifacts: {
- 		   vaultPolicyKey: localStorage.getItem("vaultPolicyKey") === "true",
-  		   vaultRegentSeal: localStorage.getItem("vaultRegentSeal") === "true",
-   		   vaultChancellorsMandate: localStorage.getItem("vaultChancellorsMandate") === "true"
-        }
+	artifacts: {
+ 	   vaultPolicyKey: localStorage.getItem("vaultPolicyKey") === "true",
+ 	   vaultRegentsSeal: localStorage.getItem("vaultRegentsSeal") === "true",
+  	  vaultChancellorsMandate: localStorage.getItem("vaultChancellorsMandate") === "true"
+	}
     };
 
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
@@ -2460,8 +2460,8 @@ function loadSavedGame(){
         rapidGuessWarnings = Number(saveData.rapidGuessWarnings || 0);
         rapidGuessLocked = !!saveData.rapidGuessLocked;
 
-        if(saveData.artifacts?.vaultPolicyKey) localStorage.setItem("vaultPolicyKey", "true");
-		if(saveData.artifacts?.vaultRegentSeal) localStorage.setItem("vaultRegentSeal", "true");
+		if(saveData.artifacts?.vaultPolicyKey) localStorage.setItem("vaultPolicyKey", "true");
+		if(saveData.artifacts?.vaultRegentsSeal) localStorage.setItem("vaultRegentsSeal", "true");
 		if(saveData.artifacts?.vaultChancellorsMandate) localStorage.setItem("vaultChancellorsMandate", "true");
 
         return true;
@@ -3512,9 +3512,9 @@ function startGame(shouldResume = false) {
         localStorage.removeItem("gauntletRoom");
 
         // Stabilization Protocol artifact keys — keep these matched to your actual Stabilization Protocol IDs.
-        localStorage.removeItem("vaultReserveKey");
-        localStorage.removeItem("vaultValuePrism");
-        localStorage.removeItem("vaultPolicyScepter");
+        localStorage.removeItem("vaultPolicyKey");
+        localStorage.removeItem("vaultRegentsSeal");
+        localStorage.removeItem("vaultChancellorsMandate");
         localStorage.removeItem(REALM_COMPLETE_KEY);
         localStorage.setItem(REALM_STATUS_KEY, "contested");
         localStorage.setItem(REALM_ROOM_KEY, "1");
@@ -3552,17 +3552,17 @@ function startGame(shouldResume = false) {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-    if(localStorage.getItem("vaultPolicyKey")){
-        document.getElementById("vaultPolicyKey").classList.add("unlocked");
-    }
+	if(localStorage.getItem("vaultPolicyKey")){
+  	  document.getElementById("vaultPolicyKey").classList.add("unlocked");
+	}
 
-    if(localStorage.getItem("vaultRegentSeal")){
-        document.getElementById("vaultRegentSeal").classList.add("unlocked");
-    }    
+	if(localStorage.getItem("vaultRegentsSeal")){
+	    document.getElementById("vaultRegentsSeal").classList.add("unlocked");
+	}
 
-    if(localStorage.getItem("vaultChancellorsMandate")){
-        document.getElementById("vaultChancellorsMandate").classList.add("unlocked");
-    }
+	if(localStorage.getItem("vaultChancellorsMandate")){
+ 	   document.getElementById("vaultChancellorsMandate").classList.add("unlocked");
+	}	
   
 // Start game loop: music + timer + first question
     bgMusic.play().catch(e => console.log("Audio started"));
@@ -3691,7 +3691,7 @@ chancellorIntroPlayed=false;
 resetRemediationState();
     questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
     usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
-    if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultReserveKey");localStorage.removeItem("vaultValuePrism");localStorage.removeItem("vaultPolicyScepter");}
+    if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultPolicyKey");localStorage.removeItem("vaultRegentsSeal");localStorage.removeItem("vaultChancellorsMandate");}
 }
 function startTimedModeClock(){
     timedModeEndTime = Date.now() + timedModeDurationMs;
@@ -5181,17 +5181,17 @@ if(remediationState.active){
          bossPool = [];
            
         // Boss defeated (artifact unlocks)
-        if(modeAllowsRealmProgress()){
+if(modeAllowsRealmProgress()){
     if(room === 10){
-        document.getElementById("vaultReserveKey").classList.add("unlocked");
-        localStorage.setItem("vaultReserveKey", "true");
+        document.getElementById("vaultPolicyKey").classList.add("unlocked");
+        localStorage.setItem("vaultPolicyKey", "true");
         showArtifact(artifacts.policyKey.img, artifacts.policyKey.title, artifacts.policyKey.text);
     }
 
     if(room === 20){
         document.getElementById("vaultRegentsSeal").classList.add("unlocked");
         localStorage.setItem("vaultRegentsSeal", "true");
-        showArtifact(artifacts.regentsSeal.img, artifacts.regentsSeal.title, artifacts.regentsSeal.text);
+        showArtifact(artifacts.regentSeal.img, artifacts.regentSeal.title, artifacts.regentSeal.text);
     }
 
     if(room === 30){
