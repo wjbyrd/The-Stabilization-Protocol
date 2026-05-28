@@ -1879,6 +1879,83 @@ TIP:
     color:#f8d981;
     border-color:rgba(248,217,129,0.42);
 }
+
+/* =========================================
+  CHANCELLOR FINAL ENTRANCE
+  Delays the final boss.
+========================================= */	
+
+.chancellor-intro{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:360px;
+    padding:30px 20px;
+    text-align:center;
+    animation: chancellorIntroFade 5s ease forwards;
+}
+
+.chancellor-intro .bossIcon{
+    width:160px;
+    height:auto;
+    margin-bottom:18px;
+    filter:
+        drop-shadow(0 0 12px rgba(255,248,231,0.95))
+        drop-shadow(0 0 32px rgba(248,217,129,0.55))
+        drop-shadow(0 0 58px rgba(56,189,248,0.38));
+}
+
+.chancellor-intro-title{
+    font-size:42px;
+    letter-spacing:5px;
+    font-weight:800;
+    color:#fff8e7;
+    text-shadow:
+        0 0 12px rgba(255,248,231,0.85),
+        0 0 32px rgba(248,217,129,0.45),
+        0 3px 8px rgba(0,0,0,0.95);
+}
+
+.chancellor-intro-line{
+    margin-top:14px;
+    font-size:24px;
+    letter-spacing:2px;
+    color:#f8d981;
+    text-shadow:
+        0 0 10px rgba(248,217,129,0.55),
+        0 2px 6px rgba(0,0,0,0.95);
+}
+
+.chancellor-intro-subline{
+    margin-top:8px;
+    font-size:17px;
+    letter-spacing:1.5px;
+    color:#c7ecff;
+    opacity:0.9;
+    text-shadow:
+        0 0 8px rgba(56,189,248,0.42),
+        0 2px 6px rgba(0,0,0,0.95);
+}
+
+@keyframes chancellorIntroFade{
+    0%{
+        opacity:0;
+        transform:scale(0.96);
+    }
+    18%{
+        opacity:1;
+        transform:scale(1);
+    }
+    82%{
+        opacity:1;
+        transform:scale(1);
+    }
+    100%{
+        opacity:0;
+        transform:scale(1.03);
+    }
+}
 </style>
 </head>
 
@@ -2223,6 +2300,7 @@ let remediationState = {
 let conceptMemory = {};
 let masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
 let adaptiveMode = "support";
+let chancellorIntroPlayed = false;
 // =============================================
 // RAPID GUESSING / BUTTON-MASHING DETECTOR
 // =============================================
@@ -3415,6 +3493,7 @@ function startGame(shouldResume = false) {
         rapidGuessHistory = [];
         rapidGuessWarnings = 0;
         rapidGuessLocked = false;
+		chancellorIntroPlayed = false;
 
         localStorage.removeItem("gauntletRoom");
 
@@ -3475,6 +3554,40 @@ function startGame(shouldResume = false) {
     bgMusic.play().catch(e => console.log("Audio started"));
     startTime = Date.now(); 
     loadQuestion();
+}
+
+function showChancellorIntro(){
+    const gameBox = document.getElementById("gameBox");
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+    const bossMsg = document.getElementById("bossMsg");
+    const imageBox = document.getElementById("questionImageBox");
+
+    if (answersElement) answersElement.innerHTML = "";
+    if (imageBox) {
+        imageBox.innerHTML = "";
+        imageBox.style.display = "none";
+    }
+
+    bossMsg.innerText = "⚠ FINAL DIRECTIVE DETECTED ⚠";
+    bossMsg.style.color = "#fff8e7";
+    gameBox.style.setProperty("--bossColor", "#fff8e7");
+    gameBox.classList.add("boss-mode");
+
+    questionElement.innerHTML = `
+        <div class="chancellor-intro">
+            <img src="chancellor.png" class="bossIcon chancellorGlow">
+            <div class="chancellor-intro-title">THE CHANCELLOR</div>
+            <div class="chancellor-intro-line">The final directive is now active.</div>
+            <div class="chancellor-intro-subline">Stand by. Policy judgment will be tested.</div>
+        </div>
+    `;
+
+    playFinalBossMusic();
+
+    setTimeout(() => {
+        loadQuestion();
+    }, 5000);
 }
 	 
 
@@ -4432,6 +4545,11 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
 
   // 3. Select the Question
 if (isBoss) {
+	if (room === 30 && bossHealth === 3 && !chancellorIntroPlayed) {
+       chancellorIntroPlayed = true;
+       showChancellorIntro();
+       return;
+    }
     // 1. If it's a new fight, build a three-question boss pool
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
         const bank = [...questionBanks[diff]];
