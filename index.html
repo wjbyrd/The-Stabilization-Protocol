@@ -4603,14 +4603,14 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
     document.getElementById("areaDisplay").innerText = `${getAreaName(room)} (${room}/30)`;
     document.getElementById("srAnnouncements").innerText = `Entering ${getAreaName(room)}. Room ${room} of 30.`;
 
-   // 3. Select the Question
+  // 3. Select the Question
 if (isBoss) {
-    // 1. If it's a new fight, build a boss question set
+    // 1. If it's a new fight, build a three-question boss pool
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
         const bank = [...questionBanks[diff]];
         let chosenTag = getWeakestTag();
 
-        const bossTags = [...new Set(bank.map(q => q.tag))];
+        const bossTags = [...new Set(bank.map(q => q.tag).filter(Boolean))];
 
         const eligibleTags = bossTags.filter(tag =>
             bank.filter(q => q.tag === tag).length >= 3
@@ -4620,22 +4620,48 @@ if (isBoss) {
             ? bank.filter(q => q.tag === chosenTag)
             : [];
 
-        // If the selected weak tag does not support a full boss set,
+        // If the weakest tag cannot support a full boss set,
         // choose a valid boss theme instead.
-        if (candidatePool.length < 3) {
+        if (candidatePool.length < 3 && eligibleTags.length > 0) {
             const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
             candidatePool = bank.filter(q => q.tag === randomTag);
         }
 
+        // Last-resort fallback: use unused questions from this difficulty.
+        if (candidatePool.length < 3) {
+            candidatePool = bank.filter(q => {
+                if (!q) return false;
+                if (usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
+                return true;
+            });
+        }
+
+        // If used-question filtering leaves too few, reset and use the whole bank.
+        if (candidatePool.length < 3) {
+            if (usedQuestions[diff]) usedQuestions[diff] = [];
+            candidatePool = [...bank];
+        }
+
         bossPool = shuffle([...candidatePool]).slice(0, 3);
+
+        if (usedQuestions[diff]) {
+            bossPool.forEach(q => {
+                if (q && !usedQuestions[diff].includes(q.id)) {
+                    usedQuestions[diff].push(q.id);
+                }
+            });
+        }
     }
 
     // 2. Select the specific question based on boss health
     currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
-    if(currentQuestion.image){
+    if (currentQuestion.image) {
         imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
         imageBox.style.display = "block";
+    } else {
+        imageBox.innerHTML = "";
+        imageBox.style.display = "none";
     }
 
     // 3. Boss Identity UI — Stabilization Protocol
@@ -4652,20 +4678,20 @@ if (isBoss) {
 
     bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
     bossMsg.style.color = bColor;
-    gameBox.style.setProperty('--bossColor', bColor);
+    gameBox.style.setProperty("--bossColor", bColor);
 
     let bossImage = "";
     let bossClass = "";
 
-    if(room === 10){
+    if (room === 10) {
         bossImage = "policy_sentinel.png";
         bossClass = "sentinelGlow";
     }
-    else if(room === 20){
+    else if (room === 20) {
         bossImage = "stabilization_warden.png";
         bossClass = "wardenGlow";
     }
-    else{
+    else {
         bossImage = "chancellor.png";
         bossClass = "chancellorGlow";
     }
@@ -4681,6 +4707,7 @@ if (isBoss) {
     return;
 
 } else {
+	
     // --- STREAK + MASTERY ADAPTIVE LOGIC ---
     let adjustedDiff = diff;
     const profile = getSelectionProfile();
