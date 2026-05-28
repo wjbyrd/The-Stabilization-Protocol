@@ -4099,180 +4099,7 @@ function shuffleOptions(question){
        
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-function getMonopolyCalc(){
-    let a = rand(80,140);
-    let b = rand(1,3);
-    let mc = rand(10,40);
-
-    // MR = a - 2bQ. Continuous optimum: Q = (a - MC) / (2b)
-    let qExact = (a - mc) / (2 * b);
-
-    // Because this game uses whole-number quantities, check nearby whole-number outputs.
-    let qLow = Math.max(0, Math.floor(qExact));
-    let qHigh = Math.max(0, Math.ceil(qExact));
-
-    function profitAt(q){
-        let p = a - b * q;
-        return (p - mc) * q;
-    }
-
-    let q = profitAt(qHigh) > profitAt(qLow) ? qHigh : qLow;
-    let price = a - b * q;
-
-    return {
-        id:10000,
-        q:`A monopolist faces demand P = ${a} - ${b}Q and MC = ${mc}.
-What price will the firm charge?`,
-        options:[
-            `$${mc}`,
-            `$${price}`,
-            `$${a}`,
-            `$${a - b*(q+5)}`
-        ],
-        a:1,
-        tag:"power",
-        type:"calculation",
-        objective:"LO 12.2",
-        feedback:"Set MR = MC to find the profit-maximizing quantity, then plug that quantity into demand to find price. Do not stop at quantity."
-    };
-}
-
-function getEfficiencyTrap(){
-    let p = rand(12,30);
-    let mc = p + rand(-10,10);
-
-    return {
-        id:10001,
-        q:`A competitive market has P = ${p} and MC = ${mc}.
-Which statement is TRUE?`,
-        options:[
-            "Market clearing alone proves the outcome is efficient",
-            mc === p
-                ? "The outcome is efficient because P = MC"
-                : (p > mc
-                    ? "The market underproduces relative to the efficient level"
-                    : "The market overproduces relative to the efficient level"),
-            "Efficiency depends on ATC",
-            "Profit determines efficiency"
-        ],
-        a:1,
-        tag:"efficiency",
-        type:"trap",
-        objective:"LO 11.2",
-        feedback:"Allocative efficiency requires P = MC. Market clearing by itself is not enough, ATC is a distraction, and profit is not the efficiency rule."
-    };
-}
-
-function getBertrandTrap(){
-    let mc = rand(5,20);
-    let high = mc + rand(6,15);
-
-    return {
-        id:10002,
-        q:`Two firms compete in prices with identical products and MC = ${mc}.
-Both currently charge $${high}.
-What is the BEST response for one firm?`,
-        options:[
-            "Raise price to increase profit",
-            `Lower price slightly below $${high}`,
-            `Set price equal to $${mc}`,
-            "Do nothing because this is equilibrium"
-        ],
-        a:1,
-        tag:"strategy",
-        type:"trap",
-        objective:"LO 13.1",
-        feedback:"With identical products, any price above marginal cost creates an incentive to undercut the rival and capture the market."
-    };
-}
-
-function getSpilloverChain(){
-    const goods = [
-        {base:"housing", input:"lumber", downstream:"furniture"},
-        {base:"cars", input:"steel", downstream:"appliances"},
-        {base:"smartphones", input:"chips", downstream:"laptops"},
-        {base:"bread", input:"wheat", downstream:"cereal"}
-    ];
-
-    let pick = goods[Math.floor(Math.random()*goods.length)];
-
-    return {
-        id:10003,
-        q:`Demand for ${pick.base} increases sharply. Production expands, raising the price of ${pick.input}.
-What is the MOST likely effect in the ${pick.downstream} market?`,
-        options:[
-            `${pick.downstream} production costs rise, shifting supply left`,
-            `${pick.downstream} demand rises directly`,
-            `No effect because these are separate markets`,
-            `${pick.downstream} prices fall due to higher input prices`
-        ],
-        a:0,
-        tag:"interaction",
-        type:"trap",
-        objective:"LO 11.1",
-        feedback:"When related industries use the same input, a demand shock in one market can raise input costs and shift supply left in another market."
-    };
-}
-
-function getCournotTrap(){
-    let qA = rand(20,50);
-    let change = rand(5,15);
-
-    return {
-        id:10004,
-        q:`Two firms compete in quantities (Cournot).
-Firm A increases output from ${qA} to ${qA + change}.
-What is the MOST likely response from Firm B and the market price?`,
-        options:[
-            "Firm B increases output, price rises",
-            "Firm B decreases output, price falls",
-            "Firm B increases output, price falls",
-            "Firm B decreases output, price rises"
-        ],
-        a:1,
-        tag:"strategy",
-        type:"trap",
-        objective:"LO 13.1",
-        feedback:"In Cournot competition, quantities are usually strategic substitutes, so Firm B tends to reduce output. But total market output still rises, which pushes price down."
-    };
-}
-
-function getPriceDisc(){
-    let groupA = rand(1,3);
-    let groupB = rand(4,8);
-
-    let higher = groupA < groupB ? "Group A" : "Group B";
-
-    return {
-        id:10005,
-        q:`A monopolist sells to two groups.
-Group A has elasticity of demand = ${groupA}.
-Group B has elasticity of demand = ${groupB}.
-
-Which group will be charged the higher price?`,
-        options:[
-            "Group A",
-            "Group B",
-            "Both groups pay the same price",
-            "Not enough information"
-        ],
-        a: higher === "Group A" ? 0 : 1,
-        tag:"power",
-        type:"trap",
-        objective:"LO 12.4",
-        feedback:"The monopolist charges the higher price to the group with lower elasticity because that group is less sensitive to price changes."
-    };
-}
-    
-const calculationGenerators = [
-    getMonopolyCalc,
-    getEfficiencyTrap,
-    getBertrandTrap,
-    getSpilloverChain,
-    getCournotTrap,
-    getPriceDisc
-];
-    
+   
 // =============================================
 // QUESTION SELECTION ENGINE — DO NOT MODIFY
 // =============================================
@@ -4582,15 +4409,15 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
    }
     
     // --- MUSIC CONTROL ---
-    if(diff === "finalBoss"){
-        playFinalBossMusic();
-        }
-    else if(diff.includes("Boss")){
-        playBossMusic();
-        }
-    else{
-        playExplorationMusic();
-        }
+	if(diff === "finalBoss" || (diff === "legendaryBoss" && room === 30)){
+ 	   playFinalBossMusic();
+	}
+	else if(diff.includes("Boss")){
+   	 playBossMusic();
+	}
+	else{
+   	 playExplorationMusic();
+	}
 
     const shell = document.getElementById("gameShell");
 
@@ -6062,6 +5889,7 @@ function sendGameData(data) {
     version: "StabilizationProtocol-ms-telemetry-v3.5",
     userAgent: navigator.userAgent || "",
     game: data.game || "The Stabilization Protocol",
+	mode: data.mode || gameMode || "standard",
     event: data.event || "",
     user: data.user || username || "anonymous",
 	email: studentEmail || "",  
