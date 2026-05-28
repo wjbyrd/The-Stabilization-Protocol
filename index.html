@@ -1953,6 +1953,12 @@ TIP:
         0 2px 6px rgba(0,0,0,0.95);
 }
 
+	.chancellor-dialogue-img{
+    width:220px !important;
+    max-width:220px !important;
+    margin-bottom:10px;
+}
+
 @keyframes chancellorIntroFade{
     0%{
         opacity:0;
@@ -3583,7 +3589,7 @@ function showChancellorIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="chancellor.png" class="bossIcon chancellorGlow">
+                <img src="chancellor.png" class="bossIcon chancellorGlow chancellor-dialogue-img">
                 <div class="chancellor-intro-title">THE CHANCELLOR</div>
 
                 <div class="chancellor-dialogue">
