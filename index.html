@@ -2988,7 +2988,86 @@ function getStrongestTag(){
 
     return strongestTag;
 }
+function getBossObjectiveKey(question){
+    if(!question) return null;
 
+    const rawObjective = question.objective || inferObjective(question);
+    if(!rawObjective) return null;
+
+    const match = String(rawObjective).match(/^LO\d+\.\d+/);
+    return match ? match[0] : rawObjective;
+}
+
+function getObjectiveFamilyStats(objectiveKey){
+    let attempts = 0;
+    let correct = 0;
+    let weightedTime = 0;
+
+    Object.keys(masteryState.byObjective || {}).forEach(key => {
+        if(key === objectiveKey || key.startsWith(objectiveKey + "_")){
+            const bucket = masteryState.byObjective[key];
+            if(!bucket) return;
+
+            attempts += bucket.attempts || 0;
+            correct += bucket.correct || 0;
+            weightedTime += (bucket.avgTime || 0) * (bucket.attempts || 0);
+        }
+    });
+
+    return {
+        attempts,
+        correct,
+        accuracy: attempts ? correct / attempts : null,
+        avgTime: attempts ? weightedTime / attempts : 0
+    };
+}
+
+function getWeakestBossObjective(bank){
+    if(!Array.isArray(bank) || bank.length === 0) return null;
+
+    const objectives = [...new Set(
+        bank.map(q => getBossObjectiveKey(q)).filter(Boolean)
+    )];
+
+    const eligibleObjectives = objectives.filter(obj =>
+        bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
+    );
+
+    if(eligibleObjectives.length === 0) return null;
+
+    let weakestObjective = null;
+    let weakestScore = -Infinity;
+
+    eligibleObjectives.forEach(obj => {
+        const stats = getObjectiveFamilyStats(obj);
+
+        let score = 0.25;
+
+        if(stats.accuracy !== null){
+            score = (1 - stats.accuracy) * 2;
+            score += Math.min(stats.attempts, 5) * 0.08;
+        }
+
+        const recentMisses = (masteryState.recent || []).filter(item => {
+            const itemObjective = item.objective || "";
+            return (itemObjective === obj || itemObjective.startsWith(obj + "_")) && !item.correct;
+        }).length;
+
+        score += recentMisses * 0.25;
+
+        if(stats.avgTime && stats.avgTime > TYPE_TIME_TARGETS.default){
+            score += 0.15;
+        }
+
+        if(score > weakestScore){
+            weakestScore = score;
+            weakestObjective = obj;
+        }
+    });
+
+    return weakestObjective || eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+}
+	 
 function getSelectionProfile(){
     const recent = getRecentPerformance(8);
     const strongestTag = getStrongestTag();
@@ -3194,6 +3273,9 @@ function getRemediationQuestion(state){
         }
 
         const allBridgePool = Object.values(microSkillBridgePools).reduce((all, pool) => all.concat(pool), []);
+        const allBridgePool = Object.values(microSkillBridgePools || {})
+            .reduce((all, pool) => all.concat(pool), []);
+
         const bridgeCandidates = getQuestionsMatchingNeed(
             allBridgePool,
             state.objective,
@@ -5313,35 +5395,42 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
 
   // 3. Select the Question
 if (isBoss) {
-    if (room === 30 && bossHealth === 3 && !chancellorIntroPlayed) {
-        chancellorIntroPlayed = true;
-        showChancellorSuspenseIntro();
-        return;
-    }
-	
-    // 1. If it's a new fight, build a three-question boss pool
+    // 1. If it's a new fight, build a three-question boss pool by objective.
+    // Boss pools are scaffolded by LO, not random tag soup.
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
-        const bank = [...questionBanks[diff]];
-        let chosenTag = getWeakestTag();
+        const bank = [...(questionBanks[diff] || [])];
+        let chosenObjective = getWeakestBossObjective(bank);
 
-        const bossTags = [...new Set(bank.map(q => q.tag).filter(Boolean))];
-
-        const eligibleTags = bossTags.filter(tag =>
-            bank.filter(q => q.tag === tag).length >= 3
-        );
-
-        let candidatePool = chosenTag
-            ? bank.filter(q => q.tag === chosenTag)
+        let candidatePool = chosenObjective
+            ? bank.filter(q => getBossObjectiveKey(q) === chosenObjective)
             : [];
 
-        // If the weakest tag cannot support a full boss set,
-        // choose a valid boss theme instead.
-        if (candidatePool.length < 3 && eligibleTags.length > 0) {
-            const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
-            candidatePool = bank.filter(q => q.tag === randomTag);
+        // Prefer unused questions inside the chosen objective.
+        let unusedCandidatePool = candidatePool.filter(q => {
+            if(!q) return false;
+            if(usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
+            return true;
+        });
+
+        if(unusedCandidatePool.length >= 3){
+            candidatePool = unusedCandidatePool;
         }
 
-        // Last-resort fallback: use unused questions from this difficulty.
+        // If the weakest objective cannot support a full boss set, use another objective with at least 3 questions.
+        if (candidatePool.length < 3) {
+            const eligibleObjectives = [...new Set(
+                bank.map(q => getBossObjectiveKey(q)).filter(Boolean)
+            )].filter(obj =>
+                bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
+            );
+
+            if(eligibleObjectives.length > 0){
+                const randomObjective = eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+                candidatePool = bank.filter(q => getBossObjectiveKey(q) === randomObjective);
+            }
+        }
+
+        // Last-resort fallback: use any unused questions from this difficulty.
         if (candidatePool.length < 3) {
             candidatePool = bank.filter(q => {
                 if (!q) return false;
