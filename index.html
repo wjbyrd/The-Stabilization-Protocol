@@ -5519,7 +5519,46 @@ if (isBoss) {
     const weakestTag = getWeakestTag();
     adaptiveMode = purpose;
 
-    if(diff === "easy" && profile.mediumReady){
+   if(gameMode === "legendary"){
+    adaptiveMode = "legendary";
+
+    currentQuestion = shuffleOptions(
+        getAdaptiveQuestion("legendary", strongestTag || weakestTag, {
+            mode: "challenge",
+            preferredTypes: ELITE_PREFERRED_TYPES,
+            purpose: "stretch"
+        })
+    );
+
+    if(currentQuestion.image){
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.style.display = "block";
+    } else {
+        imageBox.innerHTML = "";
+        imageBox.style.display = "none";
+    }
+
+    if(!currentQuestion.type){
+        currentQuestion.type = "synthesis";
+    }
+
+    wizardSpeak(getWizardLine(currentQuestion.type));
+
+    bossMsg.innerText = (room === 9 || room === 19 || room === 29)
+        ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️"
+        : "";
+    bossMsg.style.color = "#f97316";
+
+    questionElement.innerHTML = `<div>${currentQuestion.q}</div>`;
+
+    document.getElementById("formulaHint").innerText =
+        currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
+
+    displayQuestion();
+    return;
+}
+		
+    else if(diff === "easy" && profile.mediumReady){
         adjustedDiff = "medium";
     }
 
