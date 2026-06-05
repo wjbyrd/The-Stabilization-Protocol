@@ -1918,31 +1918,34 @@ Every pixel matters.
 }
  
 
-
-
-
-
 /* =========================================
    STABILIZATION PROTOCOL IDENTITY OVERRIDE
    White-gold policy chamber with restrained blue signal accents.
 ========================================= */
+
 .stabilization-protocol{
-    color:#fff8e7;
+  color:#fff8e7;
 }
+
 .stabilization-protocol .title,
 .stabilization-protocol .top-title,
 .stabilization-protocol .boss-title,
 .stabilization-protocol #artifactVault h3{
-    color:#f8d981;
-    text-shadow:0 0 12px rgba(248,217,129,0.72), 0 0 28px rgba(255,255,255,0.24), 0 3px 8px rgba(0,0,0,0.88);
+  color:#f8d981;
+  text-shadow:
+    0 0 12px rgba(248,217,129,0.72),
+    0 0 28px rgba(255,255,255,0.24),
+    0 3px 8px rgba(0,0,0,0.88);
 }
+
 .stabilization-protocol .subtitle,
 .stabilization-protocol .tagline,
 .stabilization-protocol #question,
 .stabilization-protocol .boss-q,
 .stabilization-protocol #message{
-    color:#fff8e7;
+  color:#fff8e7;
 }
+
 .stabilization-protocol #gameShell,
 .stabilization-protocol #gameBox,
 .stabilization-protocol #wizardBox,
@@ -1950,137 +1953,162 @@ Every pixel matters.
 .stabilization-protocol #artifactDrop,
 .stabilization-protocol .mode-select-panel,
 .stabilization-protocol .game-modal-card{
-    background:
-      radial-gradient(circle at top, rgba(255,255,255,0.18), rgba(248,217,129,0.10) 34%, rgba(31,24,9,0.90) 72%, rgba(5,5,4,0.98));
-    border-color:rgba(248,217,129,0.44);
-    box-shadow:0 0 24px rgba(248,217,129,0.20), 0 0 62px rgba(255,255,255,0.10), inset 0 0 36px rgba(0,0,0,0.72);
+  background:
+    radial-gradient(circle at top,
+      rgba(255,255,255,0.18),
+      rgba(248,217,129,0.10) 34%,
+      rgba(31,24,9,0.90) 72%,
+      rgba(5,5,4,0.98));
+  border-color:rgba(248,217,129,0.44);
+  box-shadow:
+    0 0 24px rgba(248,217,129,0.20),
+    0 0 62px rgba(255,255,255,0.10),
+    inset 0 0 36px rgba(0,0,0,0.72);
 }
+
 .stabilization-protocol button,
 .stabilization-protocol .answers button,
 .stabilization-protocol .continue-btn,
 .stabilization-protocol .mode-card{
-    background:linear-gradient(180deg, rgba(120,88,28,0.96), rgba(30,24,12,0.98));
-    color:#fff8e7;
-    border-color:rgba(248,217,129,0.48);
+  background:linear-gradient(180deg, rgba(120,88,28,0.96), rgba(30,24,12,0.98));
+  color:#fff8e7;
+  border-color:rgba(248,217,129,0.48);
 }
+
 .stabilization-protocol button:hover,
 .stabilization-protocol .answers button:hover,
 .stabilization-protocol .mode-card:hover{
-    background:linear-gradient(180deg, rgba(164,121,38,0.98), rgba(50,39,16,0.98));
-    border-color:rgba(255,255,255,0.72);
-    box-shadow:0 0 20px rgba(248,217,129,0.46), 0 0 36px rgba(255,255,255,0.18), inset 0 0 12px rgba(0,0,0,0.66);
+  background:linear-gradient(180deg, rgba(164,121,38,0.98), rgba(50,39,16,0.98));
+  border-color:rgba(255,255,255,0.72);
+  box-shadow:
+    0 0 20px rgba(248,217,129,0.46),
+    0 0 36px rgba(255,255,255,0.18),
+    inset 0 0 12px rgba(0,0,0,0.66);
 }
+
 .stabilization-protocol #progressFill{
-    background:linear-gradient(90deg, #ffffff, #f8d981, #b8872f);
-    box-shadow:0 0 12px rgba(248,217,129,0.58), 0 0 26px rgba(255,255,255,0.24);
+  background:linear-gradient(90deg, #ffffff, #f8d981, #b8872f);
+  box-shadow:
+    0 0 12px rgba(248,217,129,0.58),
+    0 0 26px rgba(255,255,255,0.24);
 }
+
 .stabilization-protocol .maze-box.active{
-    border-color:#fff8e7;
-    box-shadow:0 0 14px rgba(255,255,255,0.76), 0 0 30px rgba(248,217,129,0.54), inset 0 0 12px rgba(0,0,0,0.62);
+  border-color:#fff8e7;
+  box-shadow:
+    0 0 14px rgba(255,255,255,0.76),
+    0 0 30px rgba(248,217,129,0.54),
+    inset 0 0 12px rgba(0,0,0,0.62);
 }
+
 .stabilization-protocol #wizardName,
 .stabilization-protocol .hint-box{
-    color:#f8d981;
-    border-color:rgba(248,217,129,0.42);
+  color:#f8d981;
+  border-color:rgba(248,217,129,0.42);
 }
 
 /* =========================================
-  CHANCELLOR FINAL ENTRANCE
-  Delays the final boss.
-========================================= */	
+   CHANCELLOR FINAL ENTRANCE
+   Delays the final boss.
+========================================= */
 
 .chancellor-intro{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    min-height:360px;
-    padding:30px 20px;
-    text-align:center;
-    animation: chancellorIntroIn .65s ease forwards;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:360px;
+  padding:30px 20px;
+  text-align:center;
+  animation:chancellorIntroIn .65s ease forwards;
 }
 
 .chancellor-suspense{
-    animation: chancellorIntroFade 5s ease forwards;
+  animation:chancellorIntroFade 5s ease forwards;
 }
 
 @keyframes chancellorIntroIn{
-    0%{
-        opacity:0;
-        transform:scale(0.97);
-    }
-    100%{
-        opacity:1;
-        transform:scale(1);
-    }
+  0%{
+    opacity:0;
+    transform:scale(0.97);
+  }
+
+  100%{
+    opacity:1;
+    transform:scale(1);
+  }
 }
 
 .chancellor-intro .bossIcon{
-    width:160px;
-    height:auto;
-    margin-bottom:18px;
-    filter:
-        drop-shadow(0 0 12px rgba(255,248,231,0.95))
-        drop-shadow(0 0 32px rgba(248,217,129,0.55))
-        drop-shadow(0 0 58px rgba(56,189,248,0.38));
+  width:160px;
+  height:auto;
+  margin-bottom:18px;
+  filter:
+    drop-shadow(0 0 12px rgba(255,248,231,0.95))
+    drop-shadow(0 0 32px rgba(248,217,129,0.55))
+    drop-shadow(0 0 58px rgba(56,189,248,0.38));
 }
 
 .chancellor-intro-title{
-    font-size:42px;
-    letter-spacing:5px;
-    font-weight:800;
-    color:#fff8e7;
-    text-shadow:
-        0 0 12px rgba(255,248,231,0.85),
-        0 0 32px rgba(248,217,129,0.45),
-        0 3px 8px rgba(0,0,0,0.95);
+  font-size:42px;
+  letter-spacing:5px;
+  font-weight:800;
+  color:#fff8e7;
+  text-shadow:
+    0 0 12px rgba(255,248,231,0.85),
+    0 0 32px rgba(248,217,129,0.45),
+    0 3px 8px rgba(0,0,0,0.95);
 }
 
 .chancellor-intro-line{
-    margin-top:14px;
-    font-size:24px;
-    letter-spacing:2px;
-    color:#f8d981;
-    text-shadow:
-        0 0 10px rgba(248,217,129,0.55),
-        0 2px 6px rgba(0,0,0,0.95);
+  margin-top:14px;
+  font-size:24px;
+  letter-spacing:2px;
+  color:#f8d981;
+  text-shadow:
+    0 0 10px rgba(248,217,129,0.55),
+    0 2px 6px rgba(0,0,0,0.95);
 }
 
 .chancellor-intro-subline{
-    margin-top:8px;
-    font-size:17px;
-    letter-spacing:1.5px;
-    color:#c7ecff;
-    opacity:0.9;
-    text-shadow:
-        0 0 8px rgba(56,189,248,0.42),
-        0 2px 6px rgba(0,0,0,0.95);
+  margin-top:8px;
+  font-size:17px;
+  letter-spacing:1.5px;
+  color:#c7ecff;
+  opacity:0.9;
+  text-shadow:
+    0 0 8px rgba(56,189,248,0.42),
+    0 2px 6px rgba(0,0,0,0.95);
 }
 
-	.chancellor-dialogue-img{
-    width:220px !important;
-    max-width:220px !important;
-    margin-bottom:10px;
+.chancellor-dialogue-img{
+  width:220px !important;
+  max-width:220px !important;
+  margin-bottom:10px;
 }
 
 @keyframes chancellorIntroFade{
-    0%{
-        opacity:0;
-        transform:scale(0.96);
-    }
-    18%{
-        opacity:1;
-        transform:scale(1);
-    }
-    82%{
-        opacity:1;
-        transform:scale(1);
-    }
-    100%{
-        opacity:0;
-        transform:scale(1.03);
-    }
+  0%{
+    opacity:0;
+    transform:scale(0.96);
+  }
+
+  18%{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  82%{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  100%{
+    opacity:0;
+    transform:scale(1.03);
+  }
 }
+	
 </style>
 </head>
 
