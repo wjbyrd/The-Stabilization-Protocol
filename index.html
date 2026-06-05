@@ -9,23 +9,7 @@ This file is divided into TWO zones:
    - Question banks
    - Boss names/images
    - Text (wizard, areas, artifacts)
-   - Visual themesfunction endTimedAttemptEarly(){
-    stopTimedModeClock();
-
-    const accuracy = totalAttempts > 0
-        ? Math.round((correctAnswers / totalAttempts) * 100)
-        : 0;
-
-    localStorage.setItem("stabilizationProtocolTimedLastRoom", String(room));
-    localStorage.setItem("stabilizationProtocolTimedLastAccuracy", String(accuracy));
-    localStorage.setItem("stabilizationProtocolTimedLastAttempts", String(totalAttempts));
-    localStorage.setItem("stabilizationProtocolTimedLastStreak", String(maxStreak));
-
-    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
-    recordTimedTrialAchievementStats(accuracy, reachedRoom);
-
-    returnToModeSelectFromRun();
-}
+   - Visual themes
 
 2. DO NOT TOUCH (Core Engine)
    - Adaptive logic
