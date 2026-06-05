@@ -2494,12 +2494,6 @@ let timedModeTimerInterval = null;
 let timedHighestRoom = 1;
 let timedSetbacks = 0;
 
-function modeAllowsSave(){ return gameMode === "standard" || gameMode === "legendary"; }
-function modeAllowsRealmProgress(){ return gameMode === "standard"; }
-function getSaveKey(){ return `${SAVE_KEY}_${gameMode || "standard"}`; }
-function isBossRoomForMode(r){ if(gameMode === "exam" || gameMode === "timed") return false; return r === 10 || r === 20 || r === 30; }
-function getModeDisplayName(){ if(gameMode === "timed") return "Timed Trial"; if(gameMode === "exam") return "Exam Drill"; if(gameMode === "legendary") return "Legendary Mode"; return "Standard Campaign"; }
-
 const REALM_TOTAL_CORRECT_KEY = "economicRealm_totalCorrectAnswers";
 const REALM_BEST_STREAK_KEY = "economicRealm_bestStreak";
 const REALM_EXAM_COMPLETE_KEY = "economicRealm_examDrillCompleted";
@@ -2513,7 +2507,7 @@ let bossesDefeatedThisRun = 0;
 
 function addRealmStat(key, amount = 1){
     const current = parseInt(localStorage.getItem(key) || "0", 10);
-    localStorage.setItem(key, String(current + amount));
+    localStorage.setItem(key, String((Number.isFinite(current) ? current : 0) + amount));
 }
 
 function setRealmFlag(key){
@@ -2521,9 +2515,11 @@ function setRealmFlag(key){
 }
 
 function updateRealmMaxStat(key, value){
+    const numericValue = Number(value || 0);
     const current = parseInt(localStorage.getItem(key) || "0", 10);
-    if(Number(value) > current){
-        localStorage.setItem(key, String(value));
+
+    if(Number.isFinite(numericValue) && numericValue > (Number.isFinite(current) ? current : 0)){
+        localStorage.setItem(key, String(numericValue));
     }
 }
 
@@ -2533,10 +2529,37 @@ function getMissionAchievementPrefix(){
 
 function markMissionLegendaryComplete(){
     localStorage.setItem(`${getMissionAchievementPrefix()}_legendaryComplete`, "true");
+    localStorage.setItem(`${getMissionAchievementPrefix()}_legendary_complete`, "true");
 }
 
 function setMissionArtifactCount(count){
     localStorage.setItem(`${getMissionAchievementPrefix()}_artifactsCollected`, String(count));
+}
+
+function updateMissionArtifactCountFromVault(){
+    const artifactCount = ["vaultPolicyKey", "vaultRegentsSeal", "vaultChancellorsMandate"]
+        .filter(key => localStorage.getItem(key) === "true").length;
+
+    setMissionArtifactCount(artifactCount);
+}
+
+function recordTimedTrialAchievementStats(accuracy, reachedRoom){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
+
+    updateRealmMaxStat("stabilizationProtocolTimedBestRoom", safeRoom);
+    updateRealmMaxStat("stabilizationProtocolTimedBestAccuracy", safeAccuracy);
+
+    updateRealmMaxStat("economicRealm_timedBestRoom", safeRoom);
+    updateRealmMaxStat("economicRealm_timedBestAccuracy", safeAccuracy);
+
+    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestRoom`, safeRoom);
+    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestAccuracy`, safeAccuracy);
+
+    if(safeRoom >= 30 && safeAccuracy >= 80){
+        setRealmFlag(REALM_TRIAL_BY_CLOCK_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_trial_by_clock_complete`);
+    }
 }
 
 function recordRealmCorrectAnswer(){
@@ -2546,17 +2569,6 @@ function recordRealmCorrectAnswer(){
 function recordRealmStreak(value){
     updateRealmMaxStat(REALM_BEST_STREAK_KEY, value);
     updateRealmMaxStat(`${getMissionAchievementPrefix()}_bestStreak`, value);
-}
-
-function recordTimedAchievementProgress(finalRoom, accuracy){
-    updateRealmMaxStat("economicRealm_timedBestRoom", Number(finalRoom) || 0);
-    updateRealmMaxStat("economicRealm_timedBestAccuracy", Number(accuracy) || 0);
-    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestRoom`, Number(finalRoom) || 0);
-    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestAccuracy`, Number(accuracy) || 0);
-
-    if(Number(finalRoom) >= 30 && Number(accuracy) >= 80){
-        setRealmFlag(REALM_TRIAL_BY_CLOCK_KEY);
-    }
 }
 
 function markExamDrillCompleted(){
@@ -2579,16 +2591,40 @@ function recordBossDefeatForAchievements(){
 function checkPerfectCalibrationAchievement(){
     if(gameMode === "standard" && bossesDefeatedThisRun >= 3 && bossMistakeCountThisRun === 0){
         setRealmFlag(REALM_PERFECT_CALIBRATION_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_perfect_calibration_complete`);
     }
 }
 
 function checkReturnAndRebuildAchievement(){
     if(gameMode === "standard" && resumedSavedRunThisSession){
         setRealmFlag(REALM_RETURN_AND_REBUILD_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_resume_finish_complete`);
     }
 }
 
+function modeAllowsSave(){
+    return gameMode === "standard" || gameMode === "legendary";
+}
 
+function modeAllowsRealmProgress(){
+    return gameMode === "standard";
+}
+
+function getSaveKey(){
+    return `${SAVE_KEY}_${gameMode || "standard"}`;
+}
+
+function isBossRoomForMode(r){
+    if(gameMode === "exam" || gameMode === "timed") return false;
+    return r === 10 || r === 20 || r === 30;
+}
+
+function getModeDisplayName(){
+    if(gameMode === "timed") return "Timed Trial";
+    if(gameMode === "exam") return "Exam Drill";
+    if(gameMode === "legendary") return "Legendary Mode";
+    return "Standard Campaign";
+}
 function saveGameState(){
     if(!modeAllowsSave()) return;
 
@@ -5987,6 +6023,8 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         },200);
 
 		correctAnswers++;
+		recordRealmCorrectAnswer();
+		recordRealmStreak(streak);
         handleStreakVisuals();
        
         // --- STAGED REMEDIATION SUCCESS PATH ---
@@ -6297,9 +6335,14 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
 // Safe to customize artifact visuals/text only
 function unlockArtifact(key) {
     const id = "vault" + key.charAt(0).toUpperCase() + key.slice(1);
-    document.getElementById(id).classList.add("unlocked");
-    localStorage.setItem(id, "true");
-    saveGameState();
+    const slot = document.getElementById(id);
+
+    if(slot){
+        slot.classList.add("unlocked");
+        localStorage.setItem(id, "true");
+        updateMissionArtifactCountFromVault();
+    }
+
     showArtifact(artifacts[key].img, artifacts[key].title, artifacts[key].text);
 }
     
