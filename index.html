@@ -2357,6 +2357,182 @@ body.game-active #soundToggle {
     transform: none !important;
 }
 		
+
+
+/* =========================================
+   15. POST-BATTLE MASTERY REPORT
+   Student-facing diagnostic after a completed run.
+========================================= */
+.mastery-report-screen{
+    text-align:left;
+    padding:24px;
+    color:#eef8ff;
+}
+
+.mastery-report-title{
+    text-align:center;
+    color:#f7d982;
+    font-size:32px;
+    letter-spacing:2px;
+    margin:0 0 8px 0;
+    text-shadow:
+        0 0 16px rgba(247,217,130,0.70),
+        0 0 30px rgba(56,189,248,0.28),
+        0 3px 8px rgba(0,0,0,0.92);
+}
+
+.mastery-report-subtitle{
+    text-align:center;
+    color:#c7ecff;
+    font-style:italic;
+    margin:0 auto 18px auto;
+    max-width:680px;
+    line-height:1.45;
+}
+
+.mastery-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(145px, 1fr));
+    gap:10px;
+    margin:18px 0;
+}
+
+.mastery-stat-card,
+.mastery-section{
+    background:
+        radial-gradient(circle at top,
+            rgba(56,189,248,0.14),
+            rgba(11,34,56,0.82) 45%,
+            rgba(2,6,23,0.96));
+    border:1px solid rgba(247,217,130,0.28);
+    border-radius:12px;
+    box-shadow:
+        0 0 18px rgba(0,0,0,0.62),
+        inset 0 0 20px rgba(0,0,0,0.52);
+}
+
+.mastery-stat-card{
+    padding:12px;
+    text-align:center;
+}
+
+.mastery-stat-label{
+    display:block;
+    color:#c7ecff;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+}
+
+.mastery-stat-value{
+    display:block;
+    color:#f7d982;
+    font-size:24px;
+    font-weight:900;
+    text-shadow:0 0 10px rgba(247,217,130,0.40);
+}
+
+.mastery-section{
+    padding:16px;
+    margin:14px 0;
+}
+
+.mastery-section h3{
+    margin:0 0 12px 0;
+    color:#f7d982;
+    letter-spacing:1px;
+    text-shadow:0 0 10px rgba(247,217,130,0.34);
+}
+
+.mastery-verdict{
+    border-left:3px solid #f7d982;
+    padding:14px 16px;
+    margin:14px 0;
+    background:rgba(2,6,23,0.54);
+    border-radius:10px;
+    color:#e0f2fe;
+    line-height:1.5;
+}
+
+.mastery-row{
+    padding:10px 0;
+    border-top:1px solid rgba(224,242,254,0.12);
+}
+
+.mastery-row:first-child{
+    border-top:none;
+}
+
+.mastery-row-main{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+}
+
+.mastery-row-name{
+    color:#eef8ff;
+    font-weight:700;
+    line-height:1.25;
+}
+
+.mastery-row-score{
+    color:#f7d982;
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.mastery-row-meta{
+    display:block;
+    margin-top:5px;
+    color:rgba(199,236,255,0.72);
+    font-size:12px;
+    line-height:1.35;
+}
+
+.mastery-bar{
+    height:8px;
+    margin-top:8px;
+    border-radius:999px;
+    background:rgba(2,6,23,0.82);
+    overflow:hidden;
+    border:1px solid rgba(56,189,248,0.18);
+}
+
+.mastery-bar-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg, #b91c1c, #38bdf8, #f7d982);
+    box-shadow:0 0 10px rgba(56,189,248,0.38);
+}
+
+.mastery-empty{
+    color:rgba(224,242,254,0.74);
+    font-style:italic;
+    margin:0;
+}
+
+.mastery-actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.mastery-actions button{
+    min-width:150px;
+}
+
+@media(max-width:768px){
+    .mastery-report-screen{ padding:14px; }
+    .mastery-report-title{ font-size:24px; }
+    .mastery-row-main{ flex-direction:column; gap:4px; }
+    .mastery-row-score{ white-space:normal; }
+}
+
 </style>
 </head>
 
@@ -5018,7 +5194,7 @@ mediumBoss: [
 {"id":3000,"difficulty":"mediumBoss","conceptCluster":"phillips_curve","primarySkill":"define_phillips_curve","secondarySkills":["short_run_tradeoff"],"repairSkill":"define_phillips_curve","commonError":"Confusing the Phillips curve with the AD-AS model.","q":"The Regent asks what the short-run Phillips curve shows. What is the answer?","options":["A short-run tradeoff between inflation and unemployment","A long-run tradeoff between inflation and output","A fixed relationship between money supply and GDP","A direct measure of government spending"],"a":0,"tag":"phillips_curve","type":"boss_scaffold_definition","objective":"LO36.1","boss":"Expectations Regent","feedback":"The short-run Phillips curve shows that lower unemployment is associated with higher inflation, and higher unemployment is associated with lower inflation."},
 {"id":3001,"difficulty":"mediumBoss","conceptCluster":"phillips_curve","primarySkill":"move_along_srpc","secondarySkills":["short_run_tradeoff"],"repairSkill":"move_along_srpc","commonError":"Reversing the short-run inflation-unemployment tradeoff.","q":"The Regent sees expansionary policy raise aggregate demand. In the short run, what Phillips curve movement should follow?","options":["Lower inflation and higher unemployment","Higher inflation and lower unemployment","Higher inflation and higher unemployment","Lower inflation and lower unemployment"],"a":1,"tag":"policy_phillips","type":"boss_scaffold_application","objective":"LO36.1","boss":"Expectations Regent","feedback":"Expansionary policy raises AD, which can lower unemployment but raises inflation in the short run."},
 {"id":3002,"difficulty":"mediumBoss","conceptCluster":"phillips_curve","primarySkill":"natural_rate_hypothesis","secondarySkills":["short_run_vs_long_run"],"repairSkill":"natural_rate_hypothesis","commonError":"Treating the short-run Phillips curve as a permanent menu.","q":"The Regent asks why policymakers cannot permanently buy lower unemployment with higher inflation. What is the answer?","options":["Expected inflation adjusts and unemployment returns to the natural rate","Money demand disappears and unemployment becomes zero","Fiscal policy shifts LRAS right whenever inflation rises","The short-run Phillips curve becomes vertical at zero inflation"],"a":0,"tag":"natural_rate_hypothesis","type":"boss_scaffold_synthesis","objective":"LO36.1","boss":"Expectations Regent","feedback":"The short-run tradeoff fades when expected inflation adjusts, pushing unemployment back toward its natural rate."},
-{"id":3003,"difficulty":"mediumBoss","conceptCluster":"phillips_curve_graphs","primarySkill":"identify_lrpc","secondarySkills":["natural_unemployment"],"repairSkill":"identify_lrpc","commonError":"Confusing the short-run and long-run Phillips curves.","q":"The Regent points to the Phillips curve graph. What does the vertical long-run Phillips curve represent?","options":["The natural rate of unemployment","The current inflation rate","The money supply target","The sacrifice ratio"],"a":0,"tag":"lrpc","type":"boss_scaffold_definition","objective":"LO36.2","boss":"Expectations Regent","feedback":"The long-run Phillips curve is vertical at the natural rate of unemployment."},
+{"id":3003,"difficulty":"mediumBoss","conceptCluster":"phillips_curve_graphs","primarySkill":"identify_lrpc","secondarySkills":["natural_unemployment"],"repairSkill":"identify_lrpc","commonError":"Confusing the short-run and long-run Phillips curves.","q":"The Regent points to the Phillips curve graph. What does the vertical long-run Phillips curve represent?","image":"lrpc.png","options":["The natural rate of unemployment","The current inflation rate","The money supply target","The sacrifice ratio"],"a":0,"tag":"lrpc","type":"boss_scaffold_definition","objective":"LO36.2","boss":"Expectations Regent","feedback":"The long-run Phillips curve is vertical at the natural rate of unemployment."},
 {"id":3004,"difficulty":"mediumBoss","conceptCluster":"phillips_curve_graphs","primarySkill":"identify_natural_unemployment","secondarySkills":["read_pc_points"],"repairSkill":"identify_natural_unemployment","commonError":"Reading the natural rate from the wrong point.","q":"Refer to the graph. Which unemployment rate is the natural rate?","options":["U1","U2","U3","I2"],"a":1,"tag":"lrpc","type":"boss_scaffold_application","objective":"LO36.2","boss":"Expectations Regent","feedback":"The LRPC is drawn at U2, so U2 is the natural rate of unemployment.","image":"lrpc.png"},
 {"id":3005,"difficulty":"mediumBoss","conceptCluster":"phillips_curve_graphs","primarySkill":"map_ad_as_to_pc","secondarySkills":["short_run_vs_long_run"],"repairSkill":"map_ad_as_to_pc","commonError":"Failing to connect output movements to unemployment movements.","q":"The Regent asks how a positive AD shock maps from AD-AS to the Phillips curve. Which answer survives?","options":["Higher output maps to lower unemployment and higher inflation","Higher output maps to higher unemployment and lower inflation","Lower output maps to lower unemployment and higher inflation","Lower output maps to higher unemployment and higher inflation"],"a":0,"tag":"ad_as_pc_integration","type":"boss_scaffold_synthesis","objective":"LO36.2","boss":"Expectations Regent","feedback":"A positive AD shock raises output and inflation; higher output usually means lower unemployment in the short run."},
 {"id":3006,"difficulty":"mediumBoss","conceptCluster":"expectations","primarySkill":"expected_inflation_shift","secondarySkills":["srpc_shift"],"repairSkill":"expected_inflation_shift","commonError":"Treating expected inflation as movement along the same SRPC.","q":"The Regent asks what happens to the short-run Phillips curve when expected inflation rises. What is the answer?","options":["It shifts downward","It shifts upward","It becomes horizontal","It becomes the money demand curve"],"a":1,"tag":"expectations","type":"boss_scaffold_definition","objective":"LO36.3","boss":"Expectations Regent","feedback":"Higher expected inflation shifts the short-run Phillips curve upward."},
@@ -5084,8 +5260,8 @@ easy: [
 {"id":22,"q":"Shoeleather costs of inflation come from:","options":["Changing menus often","Holding less cash and making more transactions","Higher unemployment benefits","Falling expected prices"],"a":1,"tag":"inflation_costs","type":"definition","objective":"LO31.4","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"shoeleather_costs","repairSkill":"shoeleather_costs","commonError":"Confusing shoeleather costs with menu costs.","feedback":"Shoeleather costs come from efforts to reduce money holdings when inflation is high."},
 {"id":23,"q":"Menu costs of inflation refer to the cost of:","options":["Printing more money","Changing posted prices","Measuring real GDP","Buying bonds"],"a":1,"tag":"inflation_costs","type":"definition","objective":"LO31.4","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"menu_costs","repairSkill":"menu_costs","commonError":"Confusing menu costs with restaurant spending.","feedback":"Menu costs are the costs firms face when changing listed prices."},
 {"id":24,"q":"When a government finances spending by printing money, it is using:","options":["An inflation tax","A reserve requirement","The Fisher effect","A supply shock"],"a":0,"tag":"inflation_tax","type":"definition","objective":"LO31.5","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"inflation_tax","repairSkill":"inflation_tax","commonError":"Confusing money creation with ordinary taxation only.","feedback":"Printing money to finance spending creates an inflation tax by reducing the value of existing money."},
-{"id":25,"q":"In an AD-AS graph, the vertical axis measures:","options":["Real GDP","The price level","Unemployment","Money supply"],"a":1,"tag":"ad_as_basics","type":"definition","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","commonError":"Confusing output with the price level.","feedback":"The vertical axis in the AD-AS model measures the price level."},
-{"id":26,"q":"In an AD-AS graph, the horizontal axis measures:","options":["The price level","Inflation expectations","Real GDP","Nominal interest rates"],"a":2,"tag":"ad_as_basics","type":"definition","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","commonError":"Confusing the AD-AS axes.","feedback":"The horizontal axis in the AD-AS model measures real GDP or output."},
+{"id":25,"q":"In an AD-AS graph, the vertical axis measures:","image":"adaslras.png","options":["Real GDP","The price level","Unemployment","Money supply"],"a":1,"tag":"ad_as_basics","type":"definition","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","commonError":"Confusing output with the price level.","feedback":"The vertical axis in the AD-AS model measures the price level."},
+{"id":26,"q":"In an AD-AS graph, the horizontal axis measures:","image":"adaslras.png","options":["The price level","Inflation expectations","Real GDP","Nominal interest rates"],"a":2,"tag":"ad_as_basics","type":"definition","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","commonError":"Confusing the AD-AS axes.","feedback":"The horizontal axis in the AD-AS model measures real GDP or output."},
 {"id":27,"q":"Which change shifts aggregate demand to the right?","options":["A decrease in government spending","An increase in consumer confidence","A negative supply shock","A rise in production costs"],"a":1,"tag":"aggregate_demand","type":"interpretation","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"identify_ad_shifters","repairSkill":"identify_ad_shifters","commonError":"Confusing AD shifters with SRAS shifters.","feedback":"Higher consumer confidence increases consumption and shifts AD to the right."},
 {"id":28,"q":"Which change shifts aggregate demand to the left?","options":["A tax increase","A stock market boom","Higher government purchases","Improved consumer confidence"],"a":0,"tag":"aggregate_demand","type":"interpretation","objective":"LO34.1","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"identify_ad_shifters","repairSkill":"identify_ad_shifters","commonError":"Thinking every policy shifts AD right.","feedback":"A tax increase reduces spending and shifts aggregate demand left."},
 {"id":29,"q":"Which curve is vertical in the long run?","options":["AD","SRAS","LRAS","Money demand"],"a":2,"tag":"lras","type":"definition","objective":"LO34.2","difficulty":"easy","conceptCluster":"ad_as","primarySkill":"identify_lras","repairSkill":"identify_lras","commonError":"Confusing SRAS and LRAS.","feedback":"LRAS is vertical because long-run output depends on resources, capital, technology, and institutions."},
@@ -5119,8 +5295,8 @@ easy: [
 {"id":57,"q":"An automatic stabilizer is best described as:","options":["A policy that changes without new legislation as the economy changes","A Fed bond sale","A permanent shift of LRAS","A fixed money multiplier"],"a":0,"tag":"automatic_stabilizers","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"automatic_stabilizers","repairSkill":"automatic_stabilizers","commonError":"Confusing automatic stabilizers with discretionary policy.","feedback":"Automatic stabilizers, such as taxes and transfer payments, respond automatically as conditions change."},
 {"id":58,"q":"Policy lags matter because stabilization policy may:","options":["Arrive after conditions have already changed","Eliminate all inflation permanently","Stop all supply shocks","Make money neutral in the short run"],"a":0,"tag":"policy_lags","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"policy_lags","repairSkill":"policy_lags","commonError":"Ignoring timing problems in stabilization policy.","feedback":"Policy can become destabilizing if it takes effect after the economy has already moved."},
 {"id":59,"q":"The Phillips curve shows a short-run trade-off between:","options":["Inflation and unemployment","Taxes and spending","Money supply and money demand","Imports and exports"],"a":0,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"define_phillips_curve","repairSkill":"define_phillips_curve","commonError":"Confusing the Phillips curve with the money market.","feedback":"The short-run Phillips curve shows a trade-off between inflation and unemployment."},
-{"id":60,"q":"On a standard Phillips curve graph, the vertical axis measures:","options":["Unemployment rate","Inflation rate","Real GDP","Money supply"],"a":1,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"read_pc_axes","repairSkill":"read_pc_axes","commonError":"Reversing the Phillips curve axes.","feedback":"The vertical axis measures the inflation rate."},
-{"id":61,"q":"On a standard Phillips curve graph, the horizontal axis measures:","options":["Inflation rate","Price level","Unemployment rate","Money demand"],"a":2,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"read_pc_axes","repairSkill":"read_pc_axes","commonError":"Reversing the Phillips curve axes.","feedback":"The horizontal axis measures the unemployment rate."},
+{"id":60,"q":"On a standard Phillips curve graph, the vertical axis measures:","image":"srpc.png","options":["Unemployment rate","Inflation rate","Real GDP","Money supply"],"a":1,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"read_pc_axes","repairSkill":"read_pc_axes","commonError":"Reversing the Phillips curve axes.","feedback":"The vertical axis measures the inflation rate."},
+{"id":61,"q":"On a standard Phillips curve graph, the horizontal axis measures:","image":"srpc.png","options":["Inflation rate","Price level","Unemployment rate","Money demand"],"a":2,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"read_pc_axes","repairSkill":"read_pc_axes","commonError":"Reversing the Phillips curve axes.","feedback":"The horizontal axis measures the unemployment rate."},
 {"id":62,"q":"In the short run, expansionary policy usually moves the economy toward:","options":["Higher inflation and lower unemployment","Lower inflation and lower unemployment","Higher unemployment and lower inflation","No change in either variable"],"a":0,"tag":"policy_phillips","type":"interpretation","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"move_along_srpc","repairSkill":"move_along_srpc","commonError":"Missing the short-run tradeoff.","feedback":"Expansionary policy raises inflation pressure and lowers unemployment in the short run."},
 {"id":63,"q":"In the short run, contractionary policy usually moves the economy toward:","options":["Higher inflation and lower unemployment","Lower inflation and higher unemployment","Higher inflation and higher unemployment","Lower unemployment and higher output"],"a":1,"tag":"policy_phillips","type":"interpretation","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"move_along_srpc","repairSkill":"move_along_srpc","commonError":"Reversing contractionary policy effects.","feedback":"Contractionary policy lowers inflation but raises unemployment in the short run."},
 {"id":64,"q":"The long-run Phillips curve is vertical at:","options":["The natural rate of unemployment","Zero inflation","The money supply","The highest price level"],"a":0,"tag":"lrpc","type":"definition","objective":"LO36.2","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"identify_lrpc","repairSkill":"identify_lrpc","commonError":"Confusing SRPC with LRPC.","feedback":"The LRPC is vertical at the natural rate of unemployment."},
@@ -5234,7 +5410,7 @@ hard: [
 {"id":215,"q":"Refer to the graph with LRAS. Starting at AD1-AS2, an adverse supply shock moves the economy to:","options":["Y3 and P2","Y2 and P2","Y1 and P3","Y1 and P1"],"a":0,"tag":"supply_shocks","type":"graph_interpretation","objective":"LO34.4","difficulty":"hard","conceptCluster":"ad_as_graphs","primarySkill":"trace_supply_shock","repairSkill":"trace_supply_shock","commonError":"Treating a supply shock as an AD shift.","feedback":"An adverse supply shock shifts SRAS from AS2 to AS1, moving the economy to Y3 and P2.","image":"adaslras.png"},
 {"id":216,"q":"Refer to the graph with LRAS. Starting at AD2-AS2, long-run self-correction most likely shifts:","options":["SRAS left toward AS1","SRAS right toward AS2","AD left toward AD1","LRAS right toward Y2"],"a":0,"tag":"long_run_adjustment","type":"graph_interpretation","objective":"LO34.5","difficulty":"hard","conceptCluster":"ad_as_graphs","primarySkill":"explain_long_run_adjustment","repairSkill":"explain_long_run_adjustment","commonError":"Missing expected price adjustment after an expansionary gap.","feedback":"At Y2 output is above potential, so rising wages and expected prices shift SRAS left." ,"image":"adaslras.png"},
 {"id":217,"q":"Refer to the graph with LRAS. Starting at AD1-AS1, long-run self-correction most likely shifts:","options":["SRAS right toward AS2","SRAS left toward AS1","AD right toward AD2","LRAS left toward Y3"],"a":0,"tag":"long_run_adjustment","type":"graph_interpretation","objective":"LO34.5","difficulty":"hard","conceptCluster":"ad_as_graphs","primarySkill":"explain_long_run_adjustment","repairSkill":"explain_long_run_adjustment","commonError":"Missing expected price adjustment after a recessionary gap.","feedback":"At Y3 output is below potential, so wages and expected prices tend to fall, shifting SRAS right." ,"image":"adaslras.png"},
-{"id":218,"q":"A tax hike reduces consumption and output falls below natural output. Which graph movement fits best?","options":["AD shifts left, creating a recessionary gap","AD shifts right, creating an expansionary gap","SRAS shifts left, raising output","LRAS shifts right, lowering prices"],"a":0,"tag":"demand_shocks","type":"multi-step","objective":"LO34.4","difficulty":"hard","conceptCluster":"ad_as","primarySkill":"trace_demand_shock","repairSkill":"trace_demand_shock","commonError":"Confusing fiscal demand effects with supply shocks.","feedback":"A tax hike reduces aggregate demand and can create a recessionary gap."},
+{"id":218,"q":"A tax hike reduces consumption and output falls below natural output. Which graph movement fits best?","image":"adaslras.png","options":["AD shifts left, creating a recessionary gap","AD shifts right, creating an expansionary gap","SRAS shifts left, raising output","LRAS shifts right, lowering prices"],"a":0,"tag":"demand_shocks","type":"multi-step","objective":"LO34.4","difficulty":"hard","conceptCluster":"ad_as","primarySkill":"trace_demand_shock","repairSkill":"trace_demand_shock","commonError":"Confusing fiscal demand effects with supply shocks.","feedback":"A tax hike reduces aggregate demand and can create a recessionary gap."},
 {"id":219,"q":"A productivity improvement lowers production costs and raises potential output over time. Which curves are most likely affected?","options":["SRAS right and LRAS right","AD left and SRAS left","SRPC up and AD left","MD right and MS left"],"a":0,"tag":"lras","type":"multi-step","objective":"LO34.2","difficulty":"hard","conceptCluster":"ad_as","primarySkill":"identify_lras","repairSkill":"identify_lras","commonError":"Treating productivity only as demand.","feedback":"Higher productivity can shift SRAS right and increase long-run aggregate supply."},
 {"id":220,"q":"An economy faces higher oil prices and falling output. Why is aggressive AD stimulus risky?","options":["It may restore output but add inflation pressure","It must lower prices and raise unemployment","It shifts SRAS right without cost","It removes the natural rate"],"a":0,"tag":"supply_shocks","type":"trap","objective":"LO34.4","difficulty":"hard","conceptCluster":"ad_as","primarySkill":"evaluate_supply_shock_policy","repairSkill":"evaluate_supply_shock_policy","commonError":"Thinking supply-shock policy has no tradeoff.","feedback":"Stimulating AD can support output but may worsen inflation after an adverse supply shock."},
 {"id":221,"q":"A negative AD shock lowers output and prices. What long-run adjustment restores output if no policy responds?","options":["Wages and expected prices fall","Wages and expected prices rise","Money demand rises permanently","LRPC shifts right"],"a":0,"tag":"long_run_adjustment","type":"multi-step","objective":"LO34.5","difficulty":"hard","conceptCluster":"ad_as","primarySkill":"explain_long_run_adjustment","repairSkill":"explain_long_run_adjustment","commonError":"Thinking recessionary gaps cannot self-correct.","feedback":"Lower wages and expected prices shift SRAS right and help output return to natural."},
@@ -5308,7 +5484,7 @@ elite: [
 {"id":316,"q":"Refer to the money-market graph. Money demand rises from MD1 to MD2 while the Fed also increases money supply from MS1 to MS2. What is the final equilibrium?","options":["d","a","e","g"],"a":0,"tag":"liquidity_preference","type":"graph_interpretation","objective":"LO35.1","difficulty":"elite","conceptCluster":"policy_graphs","primarySkill":"read_money_market_equilibrium","repairSkill":"read_money_market_equilibrium","commonError":"Tracking only money demand or money supply.","feedback":"MD2 and MS2 intersect at point d.","image":"moneyd2_moneys2.png"},
 {"id":317,"q":"Refer to the money-market graph. Money demand falls from MD2 to MD1 while the Fed reduces money supply from MS2 to MS1. What is the final equilibrium?","options":["e","d","g","a"],"a":0,"tag":"liquidity_preference","type":"graph_interpretation","objective":"LO35.1","difficulty":"elite","conceptCluster":"policy_graphs","primarySkill":"read_money_market_equilibrium","repairSkill":"read_money_market_equilibrium","commonError":"Tracking only one curve shift.","feedback":"MD1 and MS1 intersect at point e.","image":"moneyd2_moneys2.png"},
 {"id":318,"q":"Refer to the money-market and AD graph. Which chain correctly explains the movement shown from MS1 to MS2 and AD1 to AD2?","options":["Money supply falls, r rises, investment falls, AD falls","Money supply rises, r falls, investment falls, AD falls","Money demand falls, r rises, consumption rises, AD rises","Money supply falls, r falls, investment rises, AD rises"],"a":0,"tag":"policy_transmission","type":"graph_interpretation","objective":"LO35.2","difficulty":"elite","conceptCluster":"policy_graphs","primarySkill":"monetary_policy_transmission","repairSkill":"monetary_policy_transmission","commonError":"Breaking the monetary transmission chain.","feedback":"A lower money supply raises interest rates, reduces investment, and shifts AD left.","image":"ad_ms_md.png"},
-{"id":319,"q":"Fiscal expansion raises AD through the multiplier, but interest rates rise and investment falls. Which graph idea fits the final result?","options":["Initial AD shift partly offset by crowding out","SRAS shift fully offset by lower taxes","LRPC shift partly offset by higher inflation","Money demand shift fully offset by M1"],"a":0,"tag":"crowding_out","type":"integration","objective":"LO35.4","difficulty":"elite","conceptCluster":"policy_transmission","primarySkill":"crowding_out_effect","repairSkill":"crowding_out_effect","commonError":"Treating the multiplier as the final effect every time.","feedback":"Fiscal expansion can be amplified by the multiplier but weakened by crowding out."},
+{"id":319,"q":"Fiscal expansion raises AD through the multiplier, but interest rates rise and investment falls. Which graph idea fits the final result?","image":"adaslras.png","options":["Initial AD shift partly offset by crowding out","SRAS shift fully offset by lower taxes","LRPC shift partly offset by higher inflation","Money demand shift fully offset by M1"],"a":0,"tag":"crowding_out","type":"integration","objective":"LO35.4","difficulty":"elite","conceptCluster":"policy_transmission","primarySkill":"crowding_out_effect","repairSkill":"crowding_out_effect","commonError":"Treating the multiplier as the final effect every time.","feedback":"Fiscal expansion can be amplified by the multiplier but weakened by crowding out."},
 {"id":320,"q":"Refer to the multiplier graph. Government spending initially moves AD1 to AD2, the multiplier moves AD2 to AD3, and crowding out offsets part of it. The final effect is likely:","options":["Between AD2 and AD3","Left of AD1","Exactly at AD3","Exactly at SRPC2"],"a":0,"tag":"crowding_out","type":"graph_interpretation","objective":"LO35.4","difficulty":"elite","conceptCluster":"policy_graphs","primarySkill":"crowding_out_effect","repairSkill":"crowding_out_effect","commonError":"Ignoring crowding out after multiplier expansion.","feedback":"Crowding out offsets part of the multiplied AD increase, so the final shift may land between AD2 and AD3.","image":"moneymultiplier.png"},
 {"id":321,"q":"A recessionary demand shock hits, but the Fed is at the zero lower bound. Which option best describes the policy problem?","options":["AD needs support, but rate cuts have limited room","AD is too high, and rate cuts work too strongly","SRAS needs support, but wages rise instantly","LRPC must shift, but M2 is too small"],"a":0,"tag":"liquidity_trap","type":"integration","objective":"LO35.5","difficulty":"elite","conceptCluster":"policy_transmission","primarySkill":"liquidity_trap","repairSkill":"liquidity_trap","commonError":"Ignoring why zero rates weaken monetary stimulus.","feedback":"When rates are near zero, traditional monetary policy may struggle to shift AD right enough."},
 {"id":322,"q":"A government passes stimulus after a recession has ended, and the economy is already above potential. What is the risk?","options":["The stimulus may worsen inflation pressure","The stimulus must lower output below potential","The stimulus shifts SRAS right automatically","The stimulus lowers expected prices instantly"],"a":0,"tag":"policy_lags","type":"integration","objective":"LO35.5","difficulty":"elite","conceptCluster":"policy_transmission","primarySkill":"policy_lags","repairSkill":"policy_lags","commonError":"Ignoring policy timing after recovery.","feedback":"Because of lags, stimulus can hit after recovery and add excess demand."},
@@ -7338,6 +7514,7 @@ function handlePracticeModeComplete(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
     `;
 
@@ -7492,6 +7669,7 @@ function handleScoreAttackVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
     `;
@@ -7824,6 +8002,525 @@ function sendGameData(data) {
 // Most issues come from bad question formatting.
 //
 // =====================================================
+
+
+
+
+// =============================================
+// POST-BATTLE MASTERY REPORT
+// Student-facing diagnostic built from masteryState.
+// Uses existing tag, objective, skill, type, accuracy, and response-time data.
+// No answer keys. No question IDs. No nonsense.
+// =============================================
+let latestResultsScreenHTML = "";
+
+const STABILIZATION_PROTOCOL_OBJECTIVE_LABELS = {
+    "LO30.1": "LO 30.1 — Money and banking foundations",
+    "LO30.2": "LO 30.2 — Banks and money creation",
+    "LO30.3": "LO 30.3 — Money supply and monetary tools",
+    "LO30.4": "LO 30.4 — Money demand and liquidity preference",
+    "LO30.5": "LO 30.5 — Money, prices, and inflation",
+    "LO31.1": "LO 31.1 — Inflation and purchasing power",
+    "LO31.2": "LO 31.2 — Quantity theory and money growth",
+    "LO31.3": "LO 31.3 — Fisher effect and nominal interest rates",
+    "LO31.4": "LO 31.4 — Costs of inflation",
+    "LO31.5": "LO 31.5 — Inflation policy and expectations",
+    "LO34.1": "LO 34.1 — AD-AS model basics",
+    "LO34.2": "LO 34.2 — Aggregate demand shifts",
+    "LO34.3": "LO 34.3 — Aggregate supply shifts",
+    "LO34.4": "LO 34.4 — Short-run output gaps",
+    "LO34.5": "LO 34.5 — Long-run adjustment",
+    "LO35.1": "LO 35.1 — Stabilization policy",
+    "LO35.2": "LO 35.2 — Fiscal policy and multipliers",
+    "LO35.3": "LO 35.3 — Monetary policy transmission",
+    "LO35.4": "LO 35.4 — Crowding out and policy limits",
+    "LO35.5": "LO 35.5 — Policy response and tradeoffs",
+    "LO36.1": "LO 36.1 — Phillips curve basics",
+    "LO36.2": "LO 36.2 — Long-run Phillips curve and natural unemployment",
+    "LO36.3": "LO 36.3 — Expectations and short-run tradeoffs",
+    "LO36.4": "LO 36.4 — Supply shocks and inflation-output tradeoffs",
+    "LO36.5": "LO 36.5 — Disinflation and sacrifice ratio"
+};
+
+function escapeHTML(value){
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function titleCase(value){
+    return String(value || "")
+        .replace(/_/g, " ")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function formatMasteryLabel(key){
+    if(!key) return "Unlabeled Concept";
+
+    const text = String(key);
+    const objectiveMatch = text.match(/^(LO\d+\.\d+)/);
+
+    if(objectiveMatch && STABILIZATION_PROTOCOL_OBJECTIVE_LABELS[objectiveMatch[1]]){
+        const suffix = text
+            .replace(objectiveMatch[1], "")
+            .replace(/^_+/, "")
+            .replace(/_/g, " ")
+            .trim();
+
+        return suffix
+            ? `${STABILIZATION_PROTOCOL_OBJECTIVE_LABELS[objectiveMatch[1]]}: ${titleCase(suffix)}`
+            : STABILIZATION_PROTOCOL_OBJECTIVE_LABELS[objectiveMatch[1]];
+    }
+
+    return titleCase(text);
+}
+
+function formatPercent(value){
+    if(value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+    return `${Math.round(Number(value) * 100)}%`;
+}
+
+function formatSeconds(ms){
+    const numeric = Number(ms || 0);
+    if(!Number.isFinite(numeric) || numeric <= 0) return "—";
+    return `${Math.round(numeric / 1000)}s`;
+}
+
+function getBucketEntry(key, bucket, category = "concept"){
+    if(!bucket || !bucket.attempts){
+        return null;
+    }
+
+    const attempts = Number(bucket.attempts || 0);
+    const correct = Number(bucket.correct || 0);
+    const accuracy = attempts ? correct / attempts : null;
+    const typeForTiming = category === "type" ? key : "default";
+    const target = getTypeTargetMs(typeForTiming);
+    const avgTime = Number(bucket.avgTime || 0);
+    const timeRatio = avgTime && target ? avgTime / target : 1;
+    const fluency = accuracy === null
+        ? 0
+        : accuracy - clamp((timeRatio - 1) * 0.25, 0, 0.35);
+
+    return {
+        key,
+        label: formatMasteryLabel(key),
+        category,
+        attempts,
+        correct,
+        accuracy,
+        avgTime,
+        timeRatio,
+        fluency
+    };
+}
+
+function getEntriesFromBuckets(source, category = "concept"){
+    return Object.entries(source || {})
+        .map(([key, bucket]) => getBucketEntry(key, bucket, category))
+        .filter(Boolean);
+}
+
+function getTypeMasteryEntries(){
+    const typeBuckets = {};
+
+    Object.values(masteryState.byTag || {}).forEach(tagBucket => {
+        Object.entries(tagBucket.byType || {}).forEach(([type, bucket]) => {
+            if(!typeBuckets[type]){
+                typeBuckets[type] = { attempts: 0, correct: 0, avgTime: 0 };
+            }
+
+            const oldAttempts = typeBuckets[type].attempts;
+            const newAttempts = oldAttempts + Number(bucket.attempts || 0);
+
+            typeBuckets[type].correct += Number(bucket.correct || 0);
+            typeBuckets[type].avgTime = newAttempts
+                ? ((typeBuckets[type].avgTime * oldAttempts) + (Number(bucket.avgTime || 0) * Number(bucket.attempts || 0))) / newAttempts
+                : 0;
+            typeBuckets[type].attempts = newAttempts;
+        });
+    });
+
+    return getEntriesFromBuckets(typeBuckets, "type");
+}
+
+function sortStrongest(entries){
+    return [...entries]
+        .filter(entry => entry.attempts >= 2)
+        .sort((a,b) => (b.accuracy - a.accuracy) || (b.fluency - a.fluency) || (b.attempts - a.attempts));
+}
+
+function sortWeakest(entries){
+    const enoughData = entries.filter(entry => entry.attempts >= 2);
+    const pool = enoughData.length ? enoughData : entries;
+
+    return [...pool]
+        .sort((a,b) => (a.accuracy - b.accuracy) || (a.fluency - b.fluency) || (b.avgTime - a.avgTime));
+}
+
+function hasMeaningfulWeakness(entries, accuracyThreshold = 0.85){
+    return (entries || []).some(entry => {
+        if(!entry || entry.attempts < 2) return false;
+
+        const accuracy = entry.accuracy === null || entry.accuracy === undefined
+            ? 1
+            : Number(entry.accuracy);
+
+        return accuracy < accuracyThreshold || entry.timeRatio > 1.35;
+    });
+}
+
+function renderMasteryRows(entries, emptyText){
+    if(!entries || entries.length === 0){
+        return `<p class="mastery-empty">${escapeHTML(emptyText)}</p>`;
+    }
+
+    return entries.map(entry => {
+        const pct = Math.max(0, Math.min(100, Math.round((entry.accuracy || 0) * 100)));
+        const pace = entry.timeRatio > 1.25
+            ? "Slow response pattern"
+            : entry.timeRatio < 0.65
+                ? "Fast response pattern"
+                : "Stable pace";
+
+        return `
+            <div class="mastery-row">
+                <div class="mastery-row-main">
+                    <span class="mastery-row-name">${escapeHTML(entry.label)}</span>
+                    <span class="mastery-row-score">${formatPercent(entry.accuracy)} · ${entry.correct}/${entry.attempts}</span>
+                </div>
+                <span class="mastery-row-meta">Average response: ${formatSeconds(entry.avgTime)} · ${pace}</span>
+                <div class="mastery-bar"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderMasteryDiagnosticSection({
+    weaknessTitle,
+    signalTitle,
+    entries,
+    hasWeakness,
+    weaknessEmptyText,
+    cleanText
+}){
+    const title = hasWeakness ? weaknessTitle : signalTitle;
+    const body = hasWeakness
+        ? renderMasteryRows(entries, weaknessEmptyText)
+        : `<p class="mastery-empty">${escapeHTML(cleanText)}</p>`;
+
+    return `
+        <div class="mastery-section">
+            <h3>${escapeHTML(title)}</h3>
+            ${body}
+        </div>
+    `;
+}
+
+function getRecentBehaviorSignals(){
+    const recent = masteryState.recent || [];
+    let fastMisses = 0;
+    let slowCorrects = 0;
+    let recentCorrect = 0;
+    let recentTimeTotal = 0;
+
+    recent.forEach(item => {
+        const target = getTypeTargetMs(item.type || "default");
+        const responseTime = Number(item.responseTime || 0);
+
+        if(item.correct) recentCorrect++;
+        if(responseTime) recentTimeTotal += responseTime;
+
+        if(!item.correct && responseTime > 0 && responseTime < target * 0.55){
+            fastMisses++;
+        }
+
+        if(item.correct && responseTime > target * 1.20){
+            slowCorrects++;
+        }
+    });
+
+    return {
+        count: recent.length,
+        accuracy: recent.length ? recentCorrect / recent.length : null,
+        avgTime: recent.length ? recentTimeTotal / recent.length : 0,
+        fastMisses,
+        slowCorrects
+    };
+}
+
+
+function getMasteryReportModeName(){
+    if(gameMode === "timed-complete") return "Timed Trial";
+    if(gameMode === "score") return "Score Attack";
+    if(gameMode === "legendary") return "Legendary Mode";
+    if(gameMode === "exam") return "Exam Drill";
+    return getModeDisplayName();
+}
+
+function getMasteryReportData(){
+    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
+    const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
+    const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
+    const skillEntries = getEntriesFromBuckets(masteryState.bySkill || {}, "skill");
+    const typeEntries = getTypeMasteryEntries();
+    const behavior = getRecentBehaviorSignals();
+
+    const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
+    const weakestObjectives = sortWeakest(objectiveEntries).slice(0, 4);
+    const weakestTypes = sortWeakest(typeEntries).slice(0, 3);
+    const weakestSkills = sortWeakest(skillEntries).slice(0, 3);
+
+    const hasObjectiveWeakness = hasMeaningfulWeakness(objectiveEntries, 0.85);
+    const hasTypeWeakness = hasMeaningfulWeakness(typeEntries, 0.85);
+    const hasSkillWeakness = hasMeaningfulWeakness(skillEntries, 0.85);
+    const hasBehaviorWeakness = behavior.fastMisses >= 2 || behavior.slowCorrects >= 3;
+    const noMajorWeakness = totalAttempts >= 8
+        && accuracy >= 0.85
+        && !hasObjectiveWeakness
+        && !hasTypeWeakness
+        && !hasSkillWeakness
+        && !hasBehaviorWeakness;
+
+    let verdict = "The Custodian found enough signal to build a report. Use it. Ignoring it would be malpractice with extra steps.";
+
+    if(totalAttempts < 5){
+        verdict = "The report is limited because this run has very few attempts. The Protocol needs more evidence before it can judge mastery with confidence.";
+    } else if(noMajorWeakness){
+        verdict = "No major weakness detected. That does not mean the Protocol is done with you. It means the next useful signal comes from harder pressure: Legendary Mode first, Score Attack after that.";
+    } else if(accuracy >= 0.90){
+        verdict = "Strong command. You cleared the Protocol with high accuracy. The weak signals below show where the next pressure test should focus.";
+    } else if(accuracy >= 0.75){
+        verdict = "Battle-ready, but not bulletproof. The weak areas below are where points will leak on an exam.";
+    } else {
+        verdict = "Unstable command. You finished, but the Protocol exposed weak signals. Hit the listed areas before chasing speed or Legendary Mode.";
+    }
+
+    const nextSteps = [];
+
+    if(noMajorWeakness){
+        nextSteps.push("Enter Legendary Mode next. The current run did not expose a major weak point, so harder multi-step and trap-heavy questions are the right next test.");
+        nextSteps.push("Use Score Attack after Legendary Mode feels stable. Speed pressure is useful only after mastery survives harder questions.");
+    } else {
+        if(hasObjectiveWeakness && weakestObjectives[0]){
+            nextSteps.push(`Review ${weakestObjectives[0].label}. That objective showed the weakest mastery signal.`);
+        }
+
+        if(hasTypeWeakness && weakestTypes[0]){
+            nextSteps.push(`Practice ${weakestTypes[0].label} questions. That question form caused the most trouble.`);
+        }
+
+        if(hasSkillWeakness && weakestSkills[0]){
+            nextSteps.push(`Drill ${weakestSkills[0].label}. That skill needs cleaner repetition.`);
+        }
+
+        if(behavior.fastMisses >= 2){
+            nextSteps.push("Slow down on traps and graph-style items. Fast misses are not fluency. They are just wrong answers with confidence.");
+        } else if(behavior.slowCorrects >= 3){
+            nextSteps.push("You can get answers right, but some correct responses were slow. Build speed only after the reasoning is automatic.");
+        }
+    }
+
+    if(nextSteps.length === 0){
+        nextSteps.push("Run a harder mode next. The current evidence does not show a major weak point. Make the Protocol earn its paycheck.");
+    }
+
+    return {
+        mode: getMasteryReportModeName(),
+        accuracy,
+        totalTimeMs,
+        timeString: formatTime(totalTimeMs),
+        totalAttempts,
+        correctAnswers,
+        maxStreak,
+        score: modeUsesScoreAttack() ? scoreAttackScore : null,
+        strongest,
+        weakestObjectives,
+        weakestTypes,
+        weakestSkills,
+        hasObjectiveWeakness,
+        hasTypeWeakness,
+        hasSkillWeakness,
+        noMajorWeakness,
+        behavior,
+        verdict,
+        nextSteps
+    };
+}
+
+function showMasteryReportScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return;
+
+    if(!document.getElementById("masteryReportScreen")){
+        latestResultsScreenHTML = gameBox.innerHTML;
+    }
+
+    const report = getMasteryReportData();
+    const scoreCard = report.score !== null
+        ? `<div class="mastery-stat-card"><span class="mastery-stat-label">Score</span><span class="mastery-stat-value">${report.score}</span></div>`
+        : "";
+
+    gameBox.innerHTML = `
+        <div id="masteryReportScreen" class="mastery-report-screen">
+            <h1 class="mastery-report-title">THE CUSTODIAN'S REPORT</h1>
+            <p class="mastery-report-subtitle">Post-battle mastery readout for The Stabilization Protocol. This is the signal behind the score.</p>
+
+            <div class="mastery-summary-grid">
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Mode</span><span class="mastery-stat-value">${escapeHTML(report.mode)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Accuracy</span><span class="mastery-stat-value">${formatPercent(report.accuracy)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Correct</span><span class="mastery-stat-value">${report.correctAnswers}/${report.totalAttempts}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Best Streak</span><span class="mastery-stat-value">${report.maxStreak}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Time</span><span class="mastery-stat-value">${escapeHTML(report.timeString)}</span></div>
+                ${scoreCard}
+            </div>
+
+            <div class="mastery-verdict">${escapeHTML(report.verdict)}</div>
+
+            <div class="mastery-section">
+                <h3>Strongest Signals</h3>
+                ${renderMasteryRows(report.strongest, "No clear strength signal yet. The run did not create enough repeated evidence.")}
+            </div>
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Learning Objectives",
+                signalTitle: "Objective Signals",
+                entries: report.weakestObjectives,
+                hasWeakness: report.hasObjectiveWeakness,
+                weaknessEmptyText: "No objective weakness was detected. Either the run was clean, or there was not enough data.",
+                cleanText: "No major objective weakness detected. Push into Legendary Mode to see whether the signal holds under harder multi-step pressure."
+            })}
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Question Forms",
+                signalTitle: "Question Form Signals",
+                entries: report.weakestTypes,
+                hasWeakness: report.hasTypeWeakness,
+                weaknessEmptyText: "No question-type weakness was detected.",
+                cleanText: "No major question-form weakness detected. The next useful test is harder prompts, closer traps, and less obvious wording."
+            })}
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Skills",
+                signalTitle: "Skill Signals",
+                entries: report.weakestSkills,
+                hasWeakness: report.hasSkillWeakness,
+                weaknessEmptyText: "No skill weakness was detected.",
+                cleanText: "No major skill weakness detected. That is your cue to stop farming safe questions and enter Legendary Mode."
+            })}
+
+            <div class="mastery-section">
+                <h3>Behavior Signals</h3>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Recent Accuracy</span>
+                        <span class="mastery-row-score">${formatPercent(report.behavior.accuracy)}</span>
+                    </div>
+                    <span class="mastery-row-meta">Based on the last ${report.behavior.count} tracked attempts.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Fast Misses</span>
+                        <span class="mastery-row-score">${report.behavior.fastMisses}</span>
+                    </div>
+                    <span class="mastery-row-meta">Fast wrong answers suggest careless reading or trap selection.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Slow Corrects</span>
+                        <span class="mastery-row-score">${report.behavior.slowCorrects}</span>
+                    </div>
+                    <span class="mastery-row-meta">Slow correct answers suggest understanding is present but not automatic yet.</span>
+                </div>
+            </div>
+
+            <div class="mastery-section">
+                <h3>Next Moves</h3>
+                ${report.nextSteps.map(step => `<div class="mastery-row"><span class="mastery-row-name">${escapeHTML(step)}</span></div>`).join("")}
+            </div>
+
+            <div class="mastery-actions">
+                <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
+                ${report.noMajorWeakness && gameMode !== "legendary" ? `<button class="continue-btn" onclick="startSelectedMode('legendary')">Enter Legendary Mode</button>` : ""}
+                <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
+                <button class="continue-btn secondary-modal-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
+            </div>
+        </div>
+    `;
+}
+
+function restoreResultsScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox || !latestResultsScreenHTML) return;
+
+    gameBox.innerHTML = latestResultsScreenHTML;
+
+    const line = document.getElementById("archivistLine");
+    if(line){
+        line.style.opacity = 1;
+    }
+}
+
+function copyMasteryReport(){
+    const report = getMasteryReportData();
+
+    const lines = [
+        "The Stabilization Protocol — Custodian's Mastery Report",
+        `Student: ${username}`,
+        `Mode: ${report.mode}`,
+        `Accuracy: ${formatPercent(report.accuracy)} (${report.correctAnswers}/${report.totalAttempts})`,
+        `Best Streak: ${report.maxStreak}`,
+        `Time: ${report.timeString}`,
+        report.score !== null ? `Score: ${report.score}` : null,
+        "",
+        "Strongest Signals:",
+        ...(report.strongest.length ? report.strongest.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No clear strength signal yet."]),
+        "",
+        report.hasObjectiveWeakness ? "Weakest Learning Objectives:" : "Objective Signals:",
+        ...(report.hasObjectiveWeakness && report.weakestObjectives.length ? report.weakestObjectives.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major objective weakness detected. Try Legendary Mode next."]),
+        "",
+        report.hasTypeWeakness ? "Weakest Question Forms:" : "Question Form Signals:",
+        ...(report.hasTypeWeakness && report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major question-form weakness detected."]),
+        "",
+        report.hasSkillWeakness ? "Weakest Skills:" : "Skill Signals:",
+        ...(report.hasSkillWeakness && report.weakestSkills.length ? report.weakestSkills.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major skill weakness detected."]),
+        "",
+        "Next Moves:",
+        ...report.nextSteps.map(step => `- ${step}`)
+    ].filter(line => line !== null);
+
+    const text = lines.join("\n");
+
+    function markCopied(){
+        const btn = Array.from(document.querySelectorAll("button"))
+            .find(button => button.innerText === "Copy Report" || button.innerText === "Copied!");
+
+        if(!btn) return;
+        const original = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => { btn.innerText = original; }, 1800);
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(markCopied);
+        return;
+    }
+
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+    markCopied();
+}
 
 </script>
 </body>
