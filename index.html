@@ -2694,14 +2694,14 @@ Respect structure strictly.
 <h1 class="mode-title">CHOOSE YOUR PROTOCOL RUN</h1>
 <p class="mode-subtitle">Select how you want to enter The Stabilization Protocol.</p>
     <div class="mode-grid">
-      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full final-exam run across all five macro chapters, with bosses, artifacts, setbacks, save status, and Realm progress.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Protocol tests final-exam synthesis and policy judgment.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="../mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full final-exam run across all five macro chapters, with bosses, artifacts, setbacks, save status, and Realm progress.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="../mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="../mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="../mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Protocol tests final-exam synthesis and policy judgment.</span></button>
       <!-- SCORE ATTACK MODE ADDITION:
            Arcade-style scoring mode. Uses the normal 30-room path and bosses,
            but does NOT count as Standard Campaign realm progress. -->
-      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="../scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
     </div>
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
@@ -2768,7 +2768,7 @@ or simplify this section.
         <div id="gameShell">
             <div id="wizardBox">
                 <div id="wizardName">The Custodian</div>
-                <img src="chancellor.webp" id="wizardImage">
+                <img src="../chancellor.webp" id="wizardImage">
             </div>
 
             <!-- GAME -->
@@ -4783,7 +4783,7 @@ function showChancellorIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img">
+                <img src="../chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img">
                 <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
                 <div class="chancellor-dialogue">
@@ -4806,7 +4806,7 @@ function showChancellorIntro(step = 1){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro">
-            <img src="chancellor.webp" class="bossIcon chancellorGlow">
+            <img src="../chancellor.webp" class="bossIcon chancellorGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
             <div class="chancellor-dialogue">
@@ -4856,7 +4856,7 @@ function showChancellorSuspenseIntro(){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro chancellor-suspense">
-            <img src="chancellor.webp" class="bossIcon chancellorGlow">
+            <img src="../chancellor.webp" class="bossIcon chancellorGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
             <div class="chancellor-intro-line">Final authority recognized.</div>
         </div>
@@ -6254,7 +6254,7 @@ function updateMazeTrack() {
             // Boss icons for future rooms
             if (i === 10){box.innerHTML = '<img src="sentinel.webp" class="boss-icon">';box.classList.add("boss10");}
             else if (i === 20){box.innerHTML = '<img src="regent.webp" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="chancellor.webp" class="boss-icon">';box.classList.add("boss30");}
+            else if (i === 30){box.innerHTML = '<img src="../chancellor.webp" class="boss-icon">';box.classList.add("boss30");}
             else box.innerText = "⬛";
         }
         
@@ -7240,7 +7240,7 @@ if(remediationState.active){
 }
 
 // --- STAGED REMEDIATION TRIGGER ---
-if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
+if (gameMode !== "legendary" && !remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
     remediationState = planRemediation(currentQuestion, responseTime) || remediationState;
     detourActive = true;
     detourReturnRoom = room;
@@ -8748,7 +8748,6 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
-
 
 
 
