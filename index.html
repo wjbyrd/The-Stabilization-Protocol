@@ -2695,14 +2695,14 @@ Respect structure strictly.
 <h1 class="mode-title">CHOOSE YOUR PROTOCOL RUN</h1>
 <p class="mode-subtitle">Select how you want to enter The Stabilization Protocol.</p>
     <div class="mode-grid">
-      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="../mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full final-exam run across all five macro chapters, with bosses, artifacts, setbacks, save status, and Realm progress.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="../mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="../mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="../mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Protocol tests final-exam synthesis and policy judgment.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full final-exam run across all five macro chapters, with bosses, artifacts, setbacks, save status, and Realm progress.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Protocol tests final-exam synthesis and policy judgment.</span></button>
       <!-- SCORE ATTACK MODE ADDITION:
            Arcade-style scoring mode. Uses the normal 30-room path and bosses,
            but does NOT count as Standard Campaign realm progress. -->
-      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="../scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
     </div>
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
@@ -2769,7 +2769,7 @@ or simplify this section.
         <div id="gameShell">
             <div id="wizardBox">
                 <div id="wizardName">The Custodian</div>
-                <img src="../chancellor.webp" id="wizardImage" alt="The Custodian">
+                <img src="chancellor.webp" id="wizardImage" alt="The Custodian">
             </div>
 
             <!-- GAME -->
@@ -3963,29 +3963,18 @@ function getWeakestBossObjective(bank){
         bank.map(q => getBossObjectiveKey(q)).filter(Boolean)
     )];
 
-    const eligibleObjectives = objectives.filter(obj =>
-        bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
-    );
+    if(objectives.length === 0) return null;
 
-    if(eligibleObjectives.length === 0) return null;
-
-    let weakestObjective = null;
-    let weakestScore = -Infinity;
-
-    eligibleObjectives.forEach(obj => {
+    const scoredObjectives = objectives.map(obj => {
         const stats = getObjectiveFamilyStats(obj);
-
-        let score = 0.25;
-
-        if(stats.accuracy !== null){
-            score = (1 - stats.accuracy) * 2;
-            score += Math.min(stats.attempts, 5) * 0.08;
-        }
-
         const recentMisses = (masteryState.recent || []).filter(item => {
             const itemObjective = item.objective || "";
             return (itemObjective === obj || itemObjective.startsWith(obj + "_")) && !item.correct;
         }).length;
+
+        let score = stats.accuracy === null
+            ? 0.35
+            : (1 - stats.accuracy) * 2;
 
         score += recentMisses * 0.25;
 
@@ -3993,42 +3982,137 @@ function getWeakestBossObjective(bank){
             score += 0.15;
         }
 
-        if(score > weakestScore){
-            weakestScore = score;
-            weakestObjective = obj;
-        }
+        return {
+            objective: obj,
+            score,
+            attempts: stats.attempts || 0
+        };
     });
 
-    return weakestObjective || eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+    const highestScore = Math.max(...scoredObjectives.map(item => item.score));
+    const nearHighest = scoredObjectives.filter(item =>
+        item.score >= highestScore - 0.05
+    );
+    const fewestAttempts = Math.min(...nearHighest.map(item => item.attempts));
+    const leastSeen = nearHighest.filter(item =>
+        item.attempts === fewestAttempts
+    );
+
+    return leastSeen[Math.floor(Math.random() * leastSeen.length)].objective;
 }
 
-function getScaffoldedBossGroups(bank){
+function getBossQuestionFingerprint(question){
+    return String(question?.q || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+function getRecentQuestionFingerprints(limitPerPool = 15){
+    const recentIds = new Set();
+
+    Object.values(questionHistory || {}).forEach(history => {
+        (history || []).slice(-limitPerPool).forEach(id => recentIds.add(id));
+    });
+
+    const fingerprints = new Set();
+
+    Object.values(questionBanks || {}).forEach(bank => {
+        (bank || []).forEach(question => {
+            if(recentIds.has(question.id)){
+                fingerprints.add(getBossQuestionFingerprint(question));
+            }
+        });
+    });
+
+    return fingerprints;
+}
+
+function buildBossQuestionSet(bank, poolName, chosenObjective){
     if(!Array.isArray(bank) || bank.length === 0) return [];
 
-    const groupedByObjective = {};
+    const usedIds = new Set(usedQuestions[poolName] || []);
+    const recentFingerprints = getRecentQuestionFingerprints();
 
-    bank.forEach(question => {
-        const objective = getBossObjectiveKey(question);
-        if(!objective) return;
+    let available = bank.filter(question =>
+        question &&
+        !usedIds.has(question.id) &&
+        !recentFingerprints.has(getBossQuestionFingerprint(question))
+    );
 
-        if(!groupedByObjective[objective]){
-            groupedByObjective[objective] = [];
-        }
+    if(available.length < 3){
+        available = bank.filter(question =>
+            question &&
+            !recentFingerprints.has(getBossQuestionFingerprint(question))
+        );
+    }
 
-        groupedByObjective[objective].push(question);
-    });
+    if(available.length < 3){
+        available = bank.filter(question =>
+            question && !usedIds.has(question.id)
+        );
+    }
 
-    const groups = [];
+    if(available.length < 3){
+        usedQuestions[poolName] = [];
+        available = bank.filter(Boolean);
+    }
 
-    Object.values(groupedByObjective).forEach(objectiveQuestions => {
-        const sorted = [...objectiveQuestions].sort((a, b) => a.id - b.id);
+    const objectiveMatches = chosenObjective
+        ? available.filter(question =>
+            getBossObjectiveKey(question) === chosenObjective
+        )
+        : [];
 
-        for(let i = 0; i + 2 < sorted.length; i += 3){
-            groups.push(sorted.slice(i, i + 3));
-        }
-    });
+    const selected = objectiveMatches.length >= 3
+        ? shuffle([...objectiveMatches]).slice(0, 3)
+        : shuffle([...objectiveMatches]);
 
-    return groups;
+    const remaining = shuffle(
+        available.filter(question =>
+            !selected.some(item => item.id === question.id)
+        )
+    );
+
+    while(selected.length < 3 && remaining.length > 0){
+        const selectedObjectives = new Set(
+            selected.map(getBossObjectiveKey).filter(Boolean)
+        );
+        const selectedTypes = new Set(
+            selected.map(item => item.type).filter(Boolean)
+        );
+        const selectedSkills = new Set(
+            selected.map(item => item.primarySkill).filter(Boolean)
+        );
+
+        let bestScore = -Infinity;
+        let bestCandidates = [];
+
+        remaining.forEach(question => {
+            let score = 0;
+            const objective = getBossObjectiveKey(question);
+
+            if(objective && !selectedObjectives.has(objective)) score += 2;
+            if(question.type && !selectedTypes.has(question.type)) score += 1;
+            if(question.primarySkill && !selectedSkills.has(question.primarySkill)) score += 1;
+
+            if(score > bestScore){
+                bestScore = score;
+                bestCandidates = [question];
+            } else if(score === bestScore){
+                bestCandidates.push(question);
+            }
+        });
+
+        const picked = bestCandidates[
+            Math.floor(Math.random() * bestCandidates.length)
+        ];
+
+        selected.push(picked);
+        remaining.splice(remaining.findIndex(item => item.id === picked.id), 1);
+    }
+
+    return selected;
 }
 
 function getSelectionProfile(){
@@ -4784,7 +4868,7 @@ function showChancellorIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="../chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img" alt="The Custodian">
+                <img src="chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img" alt="The Custodian">
                 <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
                 <div class="chancellor-dialogue">
@@ -4807,7 +4891,7 @@ function showChancellorIntro(step = 1){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro">
-            <img src="../chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
+            <img src="chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
             <div class="chancellor-dialogue">
@@ -4857,7 +4941,7 @@ function showChancellorSuspenseIntro(){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro chancellor-suspense">
-            <img src="../chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
+            <img src="chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
             <div class="chancellor-intro-line">Final authority recognized.</div>
         </div>
@@ -5320,14 +5404,14 @@ easyBoss: [
 { id: 2002, q: "Currency held by the public is $900, checkable deposits are $1,100, savings deposits are $1,500, and small time deposits are $500. What are M1 and M2?", options: ["M1 = $2,000; M2 = $4,000", "M1 = $900; M2 = $2,900", "M1 = $1,100; M2 = $3,100", "M1 = $2,000; M2 = $2,000"], a: 0, tag: "money_measures", type: "boss_scaffold_synthesis", objective: "30.1", difficulty: "easyboss", conceptCluster: "money_supply_measures", primarySkill: "calculate_m1_m2", secondarySkills: ["currency", "checkable_deposits", "near_money"], repairSkill: "m1_m2_components", commonError: "forgetting M2 includes M1 plus near monies", feedback: "M1 is $900 + $1,100 = $2,000. M2 adds savings and small time deposits, so M2 = $4,000." },
 { id: 2003, q: "The Federal Reserve is best described as", options: ["the central bank of the United States", "the agency that writes federal spending bills", "the agency that collects income taxes", "a private household lender"], a: 0, tag: "federal_reserve", type: "boss_scaffold_definition", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "identify_fed_role", secondarySkills: ["central_bank"], repairSkill: "fed_role", commonError: "confusing the Fed with fiscal agencies", feedback: "The Fed is the U.S. central bank. It handles monetary policy, not tax law." },
 { id: 2004, q: "The FOMC is most directly connected to", options: ["open-market operations and monetary policy", "writing the federal budget", "calculating the CPI", "setting income tax brackets"], a: 0, tag: "federal_reserve", type: "boss_scaffold_application", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "connect_fomc_to_policy", secondarySkills: ["open_market_operations", "monetary_policy"], repairSkill: "fomc_role", commonError: "confusing FOMC actions with fiscal policy", feedback: "The FOMC conducts monetary policy largely through open-market operations." },
-{ id: 2005, q: "A central bank faces political pressure to expand money before an election. Why does central bank independence matter here?", options: ["It can reduce short-run political pressure for excessive money growth.", "It lets the Fed set income tax rates.", "It prevents all inflation forever.", "It makes banks stop lending."], a: 0, tag: "federal_reserve", type: "boss_scaffold_synthesis", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "explain_fed_independence", secondarySkills: ["political_pressure", "money_growth"], repairSkill: "fed_independence", commonError: "thinking Fed independence has nothing to do with inflation risk", feedback: "Independence can help keep monetary policy from being pushed around for short-run political gain." },
+{ id: 2005, q: "A central bank faces political pressure to expand money before an election. Why does central bank independence matter here?", options: ["It limits political pressure for excessive money growth.", "It lets the Fed set income tax rates.", "It prevents all inflation forever.", "It makes banks stop lending."], a: 0, tag: "federal_reserve", type: "boss_scaffold_synthesis", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "explain_fed_independence", secondarySkills: ["political_pressure", "money_growth"], repairSkill: "fed_independence", commonError: "thinking Fed independence has nothing to do with inflation risk", feedback: "Independence can help keep monetary policy from being pushed around for short-run political gain." },
 { id: 2006, q: "In a fractional reserve system, banks", options: ["hold part of deposits as reserves and lend the rest", "must hold 100 percent of deposits as reserves", "cannot affect the money supply", "create money by printing currency"], a: 0, tag: "banking_system", type: "boss_scaffold_definition", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "identify_fractional_reserve_banking", secondarySkills: ["reserves", "lending"], repairSkill: "fractional_reserve_definition", commonError: "thinking banks create money by printing cash", feedback: "Banks create deposits through lending, not by printing currency." },
 { id: 2007, q: "A bank has $800,000 in deposits, $110,000 in reserves, and a 10 percent reserve requirement. How much can it lend?", options: ["$30,000", "$80,000", "$110,000", "$690,000"], a: 0, tag: "excess_reserves", type: "boss_scaffold_calculation", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "calculate_excess_reserves", secondarySkills: ["required_reserves", "actual_reserves"], repairSkill: "excess_reserves_formula", commonError: "treating all reserves as lendable reserves", feedback: "Required reserves are $80,000. Excess reserves are $110,000 - $80,000 = $30,000." },
 { id: 2008, q: "A new $5,000 deposit enters a banking system with a 20 percent reserve requirement. What is the first bank's initial loan and the simple maximum total deposit expansion?", options: ["Initial loan = $4,000; total expansion = $25,000", "Initial loan = $1,000; total expansion = $5,000", "Initial loan = $5,000; total expansion = $25,000", "Initial loan = $4,000; total expansion = $20,000"], a: 0, tag: "money_multiplier_banking", type: "boss_scaffold_synthesis", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "combine_lending_and_multiplier", secondarySkills: ["reserve_ratio", "excess_reserves", "money_multiplier"], repairSkill: "money_multiplier_application", commonError: "confusing first-round lending with total deposit expansion", feedback: "The bank lends $4,000. The multiplier is 1/0.20 = 5, so total expansion can reach $25,000." },
 { id: 2009, q: "If the Fed buys government bonds, the money supply tends to", options: ["increase", "decrease", "stay fixed", "turn into commodity money"], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_definition", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "identify_open_market_direction", secondarySkills: ["bond_purchase", "money_supply"], repairSkill: "fed_buys_bonds_money_supply", commonError: "thinking bond purchases remove money from circulation", feedback: "Buying bonds injects reserves and tends to increase the money supply." },
 { id: 2010, q: "If the Fed wants to reduce the money supply using open-market operations, what should it do?", options: ["Sell government bonds.", "Buy government bonds.", "Lower reserve requirements.", "Lower the discount rate."], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_application", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "select_contractionary_tool", secondarySkills: ["bond_sale", "money_supply"], repairSkill: "fed_sells_bonds_money_supply", commonError: "thinking bond sales add reserves", feedback: "Selling bonds pulls money out of the banking system and contracts the money supply." },
 { id: 2011, q: "The Fed sells $20 million in bonds and the money multiplier is 5. Under the simple model, what is the maximum decrease in the money supply?", options: ["$100 million", "$20 million", "$4 million", "$25 million"], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_synthesis", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "apply_bond_sale_multiplier", secondarySkills: ["open_market_operations", "money_multiplier"], repairSkill: "fed_sells_bonds_money_supply", commonError: "dividing by the multiplier instead of multiplying", feedback: "A $20 million bond sale times multiplier 5 gives a maximum $100 million money-supply decrease." },
-{ id: 2012, q: "Why is the Fed's control over the money supply imperfect?", options: ["Banks may hold excess reserves and the public may hold currency.", "The Fed cannot influence reserves.", "Banks cannot lend money.", "Currency is not money."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_definition", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "identify_control_limit", secondarySkills: ["excess_reserves", "currency_holdings"], repairSkill: "limits_of_monetary_control", commonError: "assuming Fed control is mechanically perfect", feedback: "The Fed can influence money creation, but banks and the public also matter." },
+{ id: 2012, q: "Why is the Fed's control over the money supply imperfect?", options: ["Excess reserves and public currency holdings.", "The Fed cannot influence reserves.", "Banks cannot lend money.", "Currency is not money."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_definition", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "identify_control_limit", secondarySkills: ["excess_reserves", "currency_holdings"], repairSkill: "limits_of_monetary_control", commonError: "assuming Fed control is mechanically perfect", feedback: "The Fed can influence money creation, but banks and the public also matter." },
 { id: 2013, q: "The Fed injects reserves, but banks choose not to lend because they are worried about risk. What happens relative to the simple multiplier?", options: ["Money creation is weaker than predicted.", "Money creation is stronger than predicted.", "The money supply must fall to zero.", "The simple multiplier becomes infinite."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_application", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "explain_excess_reserve_limit", secondarySkills: ["bank_behavior", "money_multiplier"], repairSkill: "actual_vs_simple_multiplier", commonError: "thinking reserves automatically become loans", feedback: "If banks hold reserves instead of lending, deposit creation is weaker than the simple multiplier predicts." },
 { id: 2014, q: "The Fed buys bonds, banks hold some excess reserves, and households keep some proceeds as currency. What is the best conclusion?", options: ["The money supply rises by less than the simple multiplier predicts.", "The money supply rises by exactly the simple multiplier amount.", "The money supply must fall because households hold currency.", "The Fed has perfect control over final money creation."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_synthesis", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "synthesize_multiplier_leakages", secondarySkills: ["excess_reserves", "currency_drain", "open_market_operations"], repairSkill: "actual_vs_simple_multiplier", commonError: "treating the simple multiplier as guaranteed", feedback: "Excess reserves and currency drain both weaken the multiplier. The Fed is powerful, not magical." }
 ],
@@ -5383,13 +5467,13 @@ easy: [
 {"id":3,"q":"Which function of money is being used when someone saves cash for a future purchase?","options":["Open-market operation","Unit of account","Store of value","Reserve ratio"],"a":2,"tag":"money_functions","type":"definition","objective":"LO30.1","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"identify_money_functions","repairSkill":"identify_money_functions","commonError":"Treating saving cash as medium of exchange.","feedback":"Money is a store of value when it transfers purchasing power into the future."},
 {"id":4,"q":"Which item is counted in M1?","options":["Large time deposits","Currency held by the public","Credit card balances","Money market mutual funds held by businesses"],"a":1,"tag":"m1_m2","type":"definition","objective":"LO30.1","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"distinguish_m1_m2","repairSkill":"distinguish_m1_m2","commonError":"Counting credit cards as money.","feedback":"M1 includes currency held by the public and checkable deposits."},
 {"id":5,"q":"Which item is included in M2 but not M1?","options":["Checkable deposits","Coins held by households","Savings deposits","Currency held by the public"],"a":2,"tag":"m1_m2","type":"definition","objective":"LO30.1","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"distinguish_m1_m2","repairSkill":"distinguish_m1_m2","commonError":"Treating M1 and M2 as identical.","feedback":"M2 includes M1 plus near monies such as savings deposits."},
-{"id":6,"q":"What is fiat money?","options":["Money backed fully by gold","Money without intrinsic value that is accepted as payment","Money used only by banks","Money that cannot lose value"],"a":1,"tag":"forms_of_money","type":"definition","objective":"LO30.1","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"commodity_vs_fiat_money","repairSkill":"commodity_vs_fiat_money","commonError":"Thinking fiat money must be backed by gold.","feedback":"Fiat money has value because people accept it, not because it has intrinsic value."},
+{"id":6,"q":"What is fiat money?","options":["Money backed fully by gold","Accepted money with no intrinsic value","Money used only by banks","Money that cannot lose value"],"a":1,"tag":"forms_of_money","type":"definition","objective":"LO30.1","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"commodity_vs_fiat_money","repairSkill":"commodity_vs_fiat_money","commonError":"Thinking fiat money must be backed by gold.","feedback":"Fiat money has value because people accept it, not because it has intrinsic value."},
 {"id":7,"q":"What is the central bank of the United States?","options":["The Treasury Department","Congress","The Federal Reserve","The FDIC"],"a":2,"tag":"federal_reserve","type":"definition","objective":"LO30.2","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"central_bank_role","repairSkill":"central_bank_role","commonError":"Confusing the Fed with fiscal agencies.","feedback":"The Federal Reserve is the central bank of the United States."},
 {"id":8,"q":"Which group directs open-market operations?","options":["Federal Open Market Committee","Congressional Budget Office","Bureau of Labor Statistics","Internal Revenue Service"],"a":0,"tag":"fomc","type":"definition","objective":"LO30.2","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"fomc_role","repairSkill":"fomc_role","commonError":"Confusing monetary policy agencies with data or tax agencies.","feedback":"The FOMC directs open-market operations as part of monetary policy."},
 {"id":9,"q":"If the reserve requirement is 10 percent, the simple money multiplier is:","options":["0.10","1","10","100"],"a":2,"tag":"money_multiplier","type":"calculation","objective":"LO30.3","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"calculate_money_multiplier_effect","repairSkill":"calculate_money_multiplier_effect","commonError":"Using the reserve ratio instead of its reciprocal.","feedback":"The simple money multiplier is 1 divided by the reserve requirement, so 1/0.10 = 10."},
 {"id":10,"q":"If a bank receives a $1,000 deposit and the reserve requirement is 20 percent, required reserves are:","options":["$200","$20","$800","$1,200"],"a":0,"tag":"required_reserves","type":"calculation","objective":"LO30.3","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"calculate_required_reserves","repairSkill":"calculate_required_reserves","commonError":"Subtracting instead of multiplying by the reserve requirement.","feedback":"Required reserves equal deposits times the reserve requirement, so $1,000 x 0.20 = $200."},
 {"id":11,"q":"If the Fed buys bonds in open-market operations, what happens first?","options":["Bank reserves tend to fall","Bank reserves tend to rise","SRAS shifts left","The natural rate falls"],"a":1,"tag":"open_market_operations","type":"interpretation","objective":"LO30.4","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"choose_fed_tool_effect","repairSkill":"choose_fed_tool_effect","commonError":"Reversing bond purchases and bond sales.","feedback":"Fed bond purchases inject reserves into the banking system."},
-{"id":12,"q":"Why is the Fed's control over the money supply not perfect?","options":["M1 and M2 are always equal","Currency is not money","The Fed cannot buy bonds","Banks and depositors also affect reserves and lending"],"a":3,"tag":"limits_monetary_control","type":"definition","objective":"LO30.5","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"limits_of_monetary_control","repairSkill":"limits_of_monetary_control","commonError":"Assuming the Fed controls every dollar directly.","feedback":"The Fed influences the money supply, but banks and depositors affect reserves, lending, and deposits."},
+{"id":12,"q":"Why is the Fed's control over the money supply not perfect?","options":["M1 and M2 are always equal","Currency is not money","The Fed cannot buy bonds","Banks and depositors also influence lending"],"a":3,"tag":"limits_monetary_control","type":"definition","objective":"LO30.5","difficulty":"easy","conceptCluster":"money_banking","primarySkill":"limits_of_monetary_control","repairSkill":"limits_of_monetary_control","commonError":"Assuming the Fed controls every dollar directly.","feedback":"The Fed influences the money supply, but banks and depositors affect reserves, lending, and deposits."},
 {"id":13,"q":"In the quantity equation MV = PY, what does PY represent?","options":["Real GDP","Nominal GDP","Money demand","Bank reserves"],"a":1,"tag":"quantity_theory","type":"definition","objective":"LO31.1","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"quantity_equation","repairSkill":"quantity_equation","commonError":"Confusing nominal GDP with real GDP.","feedback":"P times Y is nominal GDP."},
 {"id":14,"q":"If M = 500, V = 2, and Y = 1,000, then P equals:","options":["2","250","1","1,500"],"a":2,"tag":"quantity_theory","type":"calculation","objective":"LO31.1","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"quantity_equation","repairSkill":"quantity_equation","commonError":"Forgetting to divide by output.","feedback":"MV = PY, so 500 x 2 = P x 1,000, which gives P = 1."},
 {"id":15,"q":"If the money supply rises while velocity and output are unchanged, the quantity theory predicts that:","options":["Real output doubles","The price level rises","Velocity becomes zero","The price level falls"],"a":1,"tag":"money_growth_inflation","type":"interpretation","objective":"LO31.1","difficulty":"easy","conceptCluster":"inflation_money_growth","primarySkill":"money_growth_to_inflation","repairSkill":"money_growth_to_inflation","commonError":"Thinking money growth must raise real output in the long run.","feedback":"With velocity and output fixed, more money means a higher price level."},
@@ -5434,7 +5518,7 @@ easy: [
 {"id":54,"q":"Crowding out occurs when fiscal expansion raises interest rates and reduces:","options":["Private investment","The price level","Money demand","The natural rate instantly"],"a":0,"tag":"crowding_out","type":"definition","objective":"LO35.4","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"crowding_out_effect","repairSkill":"crowding_out_effect","commonError":"Missing the interest-rate channel.","feedback":"Crowding out reduces private investment when fiscal expansion raises interest rates."},
 {"id":55,"q":"If the MPC is 0.75, the simple government purchases multiplier is:","options":["4","0.75","1.33","7.5"],"a":0,"tag":"multiplier_effect","type":"calculation","objective":"LO35.4","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"calculate_spending_multiplier","repairSkill":"calculate_spending_multiplier","commonError":"Using MPC as the multiplier.","feedback":"The multiplier is 1/(1-MPC), so 1/(1-0.75)=4."},
 {"id":56,"q":"A liquidity trap occurs when monetary policy has trouble stimulating AD because:","options":["Interest rates are near zero","Taxes are too low","LRAS is horizontal","M1 equals M2"],"a":0,"tag":"liquidity_trap","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"liquidity_trap","repairSkill":"liquidity_trap","commonError":"Thinking monetary policy is always equally powerful.","feedback":"In a liquidity trap, nominal interest rates are near zero, making traditional monetary stimulus weaker."},
-{"id":57,"q":"An automatic stabilizer is best described as:","options":["A policy that changes without new legislation as the economy changes","A Fed bond sale","A permanent shift of LRAS","A fixed money multiplier"],"a":0,"tag":"automatic_stabilizers","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"automatic_stabilizers","repairSkill":"automatic_stabilizers","commonError":"Confusing automatic stabilizers with discretionary policy.","feedback":"Automatic stabilizers, such as taxes and transfer payments, respond automatically as conditions change."},
+{"id":57,"q":"An automatic stabilizer is best described as:","options":["A built-in response to the economy","A Fed bond sale","A permanent shift of LRAS","A fixed money multiplier"],"a":0,"tag":"automatic_stabilizers","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"automatic_stabilizers","repairSkill":"automatic_stabilizers","commonError":"Confusing automatic stabilizers with discretionary policy.","feedback":"Automatic stabilizers, such as taxes and transfer payments, respond automatically as conditions change."},
 {"id":58,"q":"Policy lags matter because stabilization policy may:","options":["Arrive after conditions have already changed","Eliminate all inflation permanently","Stop all supply shocks","Make money neutral in the short run"],"a":0,"tag":"policy_lags","type":"definition","objective":"LO35.5","difficulty":"easy","conceptCluster":"policy_transmission","primarySkill":"policy_lags","repairSkill":"policy_lags","commonError":"Ignoring timing problems in stabilization policy.","feedback":"Policy can become destabilizing if it takes effect after the economy has already moved."},
 {"id":59,"q":"The Phillips curve shows a short-run trade-off between:","options":["Inflation and unemployment","Taxes and spending","Money supply and money demand","Imports and exports"],"a":0,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"define_phillips_curve","repairSkill":"define_phillips_curve","commonError":"Confusing the Phillips curve with the money market.","feedback":"The short-run Phillips curve shows a trade-off between inflation and unemployment."},
 {"id":60,"q":"On a standard Phillips curve graph, the vertical axis measures:","image":"srpc.webp","options":["Unemployment rate","Inflation rate","Real GDP","Money supply"],"a":1,"tag":"phillips_curve","type":"definition","objective":"LO36.1","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"read_pc_axes","repairSkill":"read_pc_axes","commonError":"Reversing the Phillips curve axes.","feedback":"The vertical axis measures the inflation rate."},
@@ -5457,7 +5541,7 @@ easy: [
 {"id":77,"q":"The sacrifice ratio measures the output cost of reducing:","options":["Inflation","Unemployment","Money demand","Imports"],"a":0,"tag":"sacrifice_ratio","type":"definition","objective":"LO36.5","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"define_sacrifice_ratio","repairSkill":"define_sacrifice_ratio","commonError":"Confusing sacrifice ratio with unemployment rate.","feedback":"The sacrifice ratio measures how much output is lost when inflation is reduced."},
 {"id":78,"q":"If the sacrifice ratio is 4 and inflation falls by 2 percentage points, the output cost is:","options":["2 percent of one year's output","4 percent of one year's output","8 percent of one year's output","16 percent of one year's output"],"a":2,"tag":"sacrifice_ratio","type":"calculation","objective":"LO36.5","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"calculate_sacrifice_ratio","repairSkill":"calculate_sacrifice_ratio","commonError":"Adding instead of multiplying.","feedback":"The output cost is 4 x 2 = 8 percent of one year's output."},
 {"id":79,"q":"Credible anti-inflation policy can reduce the sacrifice ratio by causing expected inflation to:","options":["Rise faster","Fall faster","Stay above actual inflation forever","Turn into unemployment"],"a":1,"tag":"sacrifice_ratio","type":"interpretation","objective":"LO36.5","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"interpret_sacrifice_ratio","repairSkill":"interpret_sacrifice_ratio","commonError":"Ignoring expectations in disinflation.","feedback":"If expected inflation falls faster, the short-run cost of disinflation can be smaller."},
-{"id":80,"q":"Which statement correctly connects AD-AS and the Phillips curve?","options":["Higher AD can raise output and inflation, which maps to lower unemployment and higher inflation on the SRPC","Higher AD always lowers inflation and unemployment","A supply shock only moves along AD","The LRPC slopes downward like SRPC"],"a":0,"tag":"ad_as_pc_integration","type":"interpretation","objective":"LO36.2","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"map_ad_as_to_pc","repairSkill":"map_ad_as_to_pc","commonError":"Failing to connect output movements with unemployment movements.","feedback":"Expansionary AD pressure raises output and inflation in AD-AS and maps to lower unemployment with higher inflation on the short-run Phillips curve."}
+{"id":80,"q":"Which statement correctly connects AD-AS and the Phillips curve?","options":["Higher AD maps to lower unemployment and higher inflation on the SRPC","Higher AD always lowers inflation and unemployment","A supply shock only moves along AD","The LRPC slopes downward like SRPC"],"a":0,"tag":"ad_as_pc_integration","type":"interpretation","objective":"LO36.2","difficulty":"easy","conceptCluster":"phillips_curve","primarySkill":"map_ad_as_to_pc","repairSkill":"map_ad_as_to_pc","commonError":"Failing to connect output movements with unemployment movements.","feedback":"Expansionary AD pressure raises output and inflation in AD-AS and maps to lower unemployment with higher inflation on the short-run Phillips curve."}
 ],
 	
 medium: [
@@ -5515,7 +5599,7 @@ medium: [
 {"id":151,"q":"Refer to the AD graph with constant price level P. Moving from AD1 to AD2 changes output from:","options":["Y1 to Y2","Y2 to Y1","Y2 to Y3","Y3 to Y1"],"a":0,"tag":"aggregate_demand","type":"graph_interpretation","objective":"LO35.3","difficulty":"medium","conceptCluster":"policy_graphs","primarySkill":"read_ad_shift","repairSkill":"read_ad_shift","commonError":"Reading the graph backward.","feedback":"At the same price level, output rises from Y1 to Y2 when AD shifts from AD1 to AD2.","image":"moneymultiplier.webp"},
 {"id":152,"q":"Refer to the AD graph with constant price level P. Which curve shows the largest aggregate demand level?","options":["AD1","AD2","AD3","P"],"a":2,"tag":"aggregate_demand","type":"graph_interpretation","objective":"LO35.3","difficulty":"medium","conceptCluster":"policy_graphs","primarySkill":"read_ad_shift","repairSkill":"read_ad_shift","commonError":"Confusing curve position with label order.","feedback":"AD3 is farthest to the right, so it shows the largest AD at price level P.","image":"moneymultiplier.webp"},
 {"id":153,"q":"The short-run Phillips curve slopes downward because higher AD tends to:","options":["Raise output, lower unemployment, and raise inflation","Lower output, lower unemployment, and lower inflation","Raise unemployment while lowering inflation forever","Shift LRPC left immediately"],"a":0,"tag":"phillips_curve","type":"interpretation","objective":"LO36.1","difficulty":"medium","conceptCluster":"phillips_curve","primarySkill":"define_phillips_curve","repairSkill":"define_phillips_curve","commonError":"Missing the AD-to-unemployment channel.","feedback":"Higher AD raises output and prices, which maps to lower unemployment and higher inflation."},
-{"id":154,"q":"Why is there no permanent Phillips-curve tradeoff?","options":["Expected inflation adjusts and unemployment returns to natural","Money demand becomes zero","AD stops affecting the short run","Inflation cannot change wages"],"a":0,"tag":"natural_rate_hypothesis","type":"interpretation","objective":"LO36.1","difficulty":"medium","conceptCluster":"phillips_curve","primarySkill":"natural_rate_hypothesis","repairSkill":"natural_rate_hypothesis","commonError":"Treating the short-run tradeoff as permanent.","feedback":"Once expectations adjust, unemployment returns to the natural rate."},
+{"id":154,"q":"Why is there no permanent Phillips-curve tradeoff?","options":["Expectations adjust; unemployment returns to normal","Money demand becomes zero","AD stops affecting the short run","Inflation cannot change wages"],"a":0,"tag":"natural_rate_hypothesis","type":"interpretation","objective":"LO36.1","difficulty":"medium","conceptCluster":"phillips_curve","primarySkill":"natural_rate_hypothesis","repairSkill":"natural_rate_hypothesis","commonError":"Treating the short-run tradeoff as permanent.","feedback":"Once expectations adjust, unemployment returns to the natural rate."},
 {"id":155,"q":"Refer to the LRPC graph. Starting at point c, expansionary policy that raises inflation above expectations moves the economy to:","options":["a","b","c","d"],"a":0,"tag":"policy_phillips","type":"graph_interpretation","objective":"LO36.1","difficulty":"medium","conceptCluster":"pc_graphs","primarySkill":"move_along_srpc","repairSkill":"move_along_srpc","commonError":"Moving to the long-run point immediately.","feedback":"Expansionary policy moves the economy along SRPC1 from c to a: higher inflation and lower unemployment.","image":"lrpc.webp"},
 {"id":156,"q":"Refer to the LRPC graph. Starting at point a, expected inflation adjusts upward. The long-run movement is to:","options":["b","c","d","U3"],"a":0,"tag":"expectations","type":"graph_interpretation","objective":"LO36.3","difficulty":"medium","conceptCluster":"pc_graphs","primarySkill":"trace_expectations_adjustment","repairSkill":"trace_expectations_adjustment","commonError":"Keeping unemployment below natural forever.","feedback":"Expectations adjust upward, SRPC shifts up, and unemployment returns to U2 at point b.","image":"lrpc.webp"},
 {"id":157,"q":"Refer to the LRPC graph. Starting at point b, contractionary policy that lowers inflation below expectations moves the economy in the short run to:","options":["a","c","d","U1"],"a":2,"tag":"policy_phillips","type":"graph_interpretation","objective":"LO36.4","difficulty":"medium","conceptCluster":"pc_graphs","primarySkill":"monetary_policy_pc_transition","repairSkill":"monetary_policy_pc_transition","commonError":"Moving directly to lower expected inflation.","feedback":"Contractionary policy moves along SRPC2 from b to d: lower inflation and higher unemployment.","image":"lrpc.webp"},
@@ -6285,7 +6369,7 @@ function updateMazeTrack() {
             // Boss icons for future rooms
             if (i === 10){box.innerHTML = '<img src="sentinel.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss10");}
             else if (i === 20){box.innerHTML = '<img src="regent.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="../chancellor.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss30");}
+            else if (i === 30){box.innerHTML = '<img src="chancellor.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss30");}
             else box.innerText = "⬛";
         }
         
@@ -6550,54 +6634,16 @@ if (isBoss) {
         const bank = [...(questionBanks[diff] || [])];
         const chosenObjective = getWeakestBossObjective(bank);
 
-        let candidatePool = chosenObjective
-            ? bank.filter(q => getBossObjectiveKey(q) === chosenObjective)
-            : [];
+        bossPool = buildBossQuestionSet(bank, diff, chosenObjective);
 
-        if(candidatePool.length < 3){
-            candidatePool = [...bank];
-        }
-
-        if(diff === "legendaryBoss"){
-            const unusedCandidates = candidatePool.filter(q =>
-                q && !(usedQuestions[diff] || []).includes(q.id)
-            );
-
-            const sourcePool = unusedCandidates.length >= 3
-                ? unusedCandidates
-                : candidatePool;
-
-            bossPool = shuffle([...sourcePool]).slice(0, 3);
-        } else {
-            let groups = getScaffoldedBossGroups(candidatePool);
-
-            if(groups.length === 0){
-                groups = getScaffoldedBossGroups(bank);
-            }
-
-            const unusedGroups = groups.filter(group =>
-                group.every(q => !(usedQuestions[diff] || []).includes(q.id))
-            );
-
-            const availableGroups = unusedGroups.length > 0
-                ? unusedGroups
-                : groups;
-
-            if(availableGroups.length > 0){
-                bossPool = [...availableGroups[
-                    Math.floor(Math.random() * availableGroups.length)
-                ]];
-            } else {
-                bossPool = [...bank]
-                    .sort((a, b) => a.id - b.id)
-                    .slice(0, 3);
-            }
+        if(bossPool.length < 3){
+            bossPool = shuffle([...bank]).slice(0, 3);
         }
 
         if (usedQuestions[diff]) {
-            bossPool.forEach(q => {
-                if (q && !usedQuestions[diff].includes(q.id)) {
-                    usedQuestions[diff].push(q.id);
+            bossPool.forEach(question => {
+                if (question && !usedQuestions[diff].includes(question.id)) {
+                    usedQuestions[diff].push(question.id);
                 }
             });
         }
@@ -6642,7 +6688,7 @@ if (isBoss) {
         bossClass = "regentGlow";
     }
     else {
-        bossImage = "../chancellor.webp";
+        bossImage = "chancellor.webp";
         bossClass = "chancellorGlow";
     }
 
@@ -8789,7 +8835,5 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
-
-
 
 
