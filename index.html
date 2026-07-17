@@ -4008,6 +4008,60 @@ function getBossQuestionFingerprint(question){
         .trim();
 }
 
+
+function getBossNarrativeStage(question){
+    const stage = String(question?.bossStage || "").toLowerCase();
+    return stage === "opening" || stage === "final" ? stage : null;
+}
+
+function orderBossQuestionSet(selected, available){
+    const ordered = [...(selected || [])];
+
+    const replaceDuplicateStage = stage => {
+        const stageIndexes = ordered
+            .map((question, index) => ({ question, index }))
+            .filter(item => getBossNarrativeStage(item.question) === stage)
+            .map(item => item.index);
+
+        stageIndexes.slice(1).forEach(index => {
+            const selectedIds = new Set(
+                ordered.map(question => question?.id).filter(id => id !== undefined)
+            );
+            const candidates = shuffle(
+                (available || []).filter(question =>
+                    question &&
+                    !selectedIds.has(question.id) &&
+                    getBossNarrativeStage(question) !== stage
+                )
+            );
+            const replacement = candidates.find(question =>
+                getBossNarrativeStage(question) === null
+            ) || candidates[0];
+
+            if(replacement){
+                ordered[index] = replacement;
+            }
+        });
+    };
+
+    replaceDuplicateStage("final");
+    replaceDuplicateStage("opening");
+
+    const stageRank = stage =>
+        stage === "opening" ? 0 : stage === "final" ? 2 : 1;
+
+    return ordered
+        .map((question, index) => ({
+            question,
+            index,
+            stage: getBossNarrativeStage(question)
+        }))
+        .sort((a, b) =>
+            stageRank(a.stage) - stageRank(b.stage) || a.index - b.index
+        )
+        .map(item => item.question);
+}
+
 function getRecentQuestionFingerprints(limitPerPool = 15){
     const recentIds = new Set();
 
@@ -4112,7 +4166,7 @@ function buildBossQuestionSet(bank, poolName, chosenObjective){
         remaining.splice(remaining.findIndex(item => item.id === picked.id), 1);
     }
 
-    return selected;
+    return orderBossQuestionSet(selected, available);
 }
 
 function getSelectionProfile(){
@@ -5394,8 +5448,8 @@ legendaryBoss: [
 {"id":9116,"q":"A government prints money to finance spending. Inflation rises, expected inflation rises, and nominal rates rise. Which ruling is strongest?","options":["The inflation tax reduces money value, and the Fisher effect raises nominal rates.","The money multiplier lowers inflation, and the Fisher effect lowers nominal rates.","The inflation tax raises real wages, and monetary neutrality fails permanently.","Commodity money loses value because fiat money must be backed by gold."],"a":0,"tag":"inflation_policy","type":"legendary_boss","objective":"LO31.5","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"inflation_tax","repairSkill":"inflation_tax","commonError":"Treating money-financed spending as painless.","feedback":"Printing money can finance spending through an inflation tax, while higher expected inflation raises nominal interest rates."},
 {"id":9117,"q":"Money growth rises sharply, velocity falls, and real output rises. Which ruling should the Custodian issue?","options":["Inflation cannot be judged from money growth alone because V and Y also changed.","Inflation must equal money growth because V and Y never affect prices.","Inflation must be zero because output growth cancels every monetary change.","Inflation must equal velocity growth because money growth is neutral."],"a":0,"tag":"quantity_theory","type":"legendary_boss","objective":"LO31.1","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"quantity_equation","repairSkill":"quantity_equation","commonError":"Using money growth alone without the quantity equation.","feedback":"MV = PY, so inflation depends on money growth, velocity growth, and real output growth."},
 {"id":9118,"q":"A student says monetary neutrality means the Fed cannot affect unemployment during a recession. Which ruling is strongest?","options":["Wrong; neutrality is a long-run claim, while short-run sticky prices allow AD effects.","Wrong; neutrality means money permanently lowers unemployment whenever inflation rises.","Correct; monetary policy cannot move AD because interest rates do not affect investment.","Correct; neutrality means SRPC and LRPC are both vertical in every period."],"a":0,"tag":"monetary_neutrality","type":"legendary_boss_trap","objective":"LO31.2","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"monetary_neutrality","repairSkill":"monetary_neutrality","commonError":"Applying long-run neutrality to short-run fluctuations.","feedback":"Money is neutral in the long run, not necessarily in the short run."},
-{"id":9119,"q":"The Custodian asks for the final synthesis: why can stabilization policy fail even when the model points in the right direction?","options":["Lags, expectations, crowding out, and supply shocks can change the final effect.","Policy always fails because AD cannot shift in the short run.","Policy always succeeds because expectations never adjust.","Policy only affects M1, so output and inflation never respond."],"a":0,"tag":"stabilization_policy","type":"legendary_boss_synthesis","objective":"LO35.5","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"choose_stabilization_response","repairSkill":"choose_stabilization_response","commonError":"Thinking correct curve direction guarantees clean policy success.","feedback":"Correct policy direction is not enough. Timing, expectations, crowding out, and supply shocks can all wreck the clean textbook story."},
-{"id":9120,"q":"The Custodian delivers the final trial: AD rises, output moves above potential, unemployment falls below natural, and expected inflation begins rising. What is the final warning?","options":["The short-run gain becomes a long-run inflation problem once expectations adjust.","The natural rate permanently falls because unemployment was low for one period.","The SRPC shifts downward because actual inflation increased above expected inflation.","The price level falls because higher AD lowers production costs."],"a":0,"tag":"ad_as_pc_integration","type":"legendary_boss_synthesis","objective":"LO36.3","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"trace_expectations_adjustment","repairSkill":"trace_expectations_adjustment","commonError":"Missing the transition from short-run policy gain to long-run expectation cost.","feedback":"Demand expansion can lower unemployment temporarily, but rising expected inflation shifts the SRPC upward and erodes the gain."}
+{"id":9119, bossStage: "final","q":"The Custodian asks for the final synthesis: why can stabilization policy fail even when the model points in the right direction?","options":["Lags, expectations, crowding out, and supply shocks can change the final effect.","Policy always fails because AD cannot shift in the short run.","Policy always succeeds because expectations never adjust.","Policy only affects M1, so output and inflation never respond."],"a":0,"tag":"stabilization_policy","type":"legendary_boss_synthesis","objective":"LO35.5","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"choose_stabilization_response","repairSkill":"choose_stabilization_response","commonError":"Thinking correct curve direction guarantees clean policy success.","feedback":"Correct policy direction is not enough. Timing, expectations, crowding out, and supply shocks can all wreck the clean textbook story."},
+{"id":9120, bossStage: "final","q":"The Custodian delivers the final trial: AD rises, output moves above potential, unemployment falls below natural, and expected inflation begins rising. What is the final warning?","options":["The short-run gain becomes a long-run inflation problem once expectations adjust.","The natural rate permanently falls because unemployment was low for one period.","The SRPC shifts downward because actual inflation increased above expected inflation.","The price level falls because higher AD lowers production costs."],"a":0,"tag":"ad_as_pc_integration","type":"legendary_boss_synthesis","objective":"LO36.3","difficulty":"legendaryBoss","conceptCluster":"final_chancellor","primarySkill":"trace_expectations_adjustment","repairSkill":"trace_expectations_adjustment","commonError":"Missing the transition from short-run policy gain to long-run expectation cost.","feedback":"Demand expansion can lower unemployment temporarily, but rising expected inflation shifts the SRPC upward and erodes the gain."}
 ],
 	
 easyBoss: [
@@ -7227,6 +7281,8 @@ if(modeAllowsRealmProgress()){
         localStorage.setItem("vaultChancellorsMandate", "true");
         showArtifact(artifacts.chancellorsMandate.img, artifacts.chancellorsMandate.title, artifacts.chancellorsMandate.text);
     }
+
+    updateMissionArtifactCountFromVault();
 }
 
 	// ... (Inside the Boss Victory check)
@@ -8835,5 +8891,4 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
-
 
