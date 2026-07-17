@@ -54,6 +54,7 @@ If you break something:
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
     
 <!-- Title can be changed to whatever the game needs -->
@@ -2681,7 +2682,7 @@ Respect structure strictly.
 <div id="startScreen">
   <div class="start-content">
     <h1 class="title">THE STABILIZATION PROTOCOL</h1>
-    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
+    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input" aria-label="School email">
     <button class="start-btn" onclick="showModeSelect()">ENTER THE PROTOCOL</button>
     <button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
         CONTINUE STANDARD RUN
@@ -2763,12 +2764,12 @@ or simplify this section.
     </div>
 
     <!-- MAIN PANEL -->
-    <!-- Main game area: Auditor + question interface -->
+    <!-- Main game area: Custodian + question interface -->
     <div class="main-panel">
         <div id="gameShell">
             <div id="wizardBox">
                 <div id="wizardName">The Custodian</div>
-                <img src="../chancellor.webp" id="wizardImage">
+                <img src="../chancellor.webp" id="wizardImage" alt="The Custodian">
             </div>
 
             <!-- GAME -->
@@ -2999,7 +3000,7 @@ let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
 let startTime; // Will be set in startGame()
-let room = localStorage.getItem("gauntletRoom") ? parseInt(localStorage.getItem("gauntletRoom")) : 1;
+let room = localStorage.getItem("stabilizationProtocolRoom") ? parseInt(localStorage.getItem("stabilizationProtocolRoom")) : 1;
 let currentQuestion = null;
 let detourActive = false;
 let detourReturnRoom = null;
@@ -3445,7 +3446,7 @@ function saveGameState(){
 
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
     if(modeAllowsRealmProgress()){
-        localStorage.setItem("gauntletRoom", String(room));
+        localStorage.setItem("stabilizationProtocolRoom", String(room));
         localStorage.setItem(REALM_STARTED_KEY, "true");
         localStorage.setItem(REALM_STATUS_KEY, "contested");
         localStorage.setItem(REALM_ROOM_KEY, String(room));
@@ -3508,7 +3509,7 @@ function loadSavedGame(){
 function clearSavedGame(){
     localStorage.removeItem(getSaveKey());
     if(gameMode === "standard"){
-        localStorage.removeItem("gauntletRoom");
+        localStorage.removeItem("stabilizationProtocolRoom");
         localStorage.removeItem("vaultPolicyKey");
         localStorage.removeItem("vaultRegentsSeal");
         localStorage.removeItem("vaultChancellorsMandate");
@@ -4463,7 +4464,7 @@ chancellorsMandate:{
 
 function getRecoveryLine(stage){
   if(stage === "repair"){
-    return "Protocol repair opened. The Stabilizer is isolating the broken macro signal.";
+    return "Protocol repair opened. The Custodian is isolating the broken macro signal.";
   }
 
   if(stage === "bridge"){
@@ -4719,7 +4720,7 @@ function startGame(shouldResume = false) {
         resetScoreAttackState();
 
         if(modeAllowsRealmProgress()){
-            localStorage.removeItem("gauntletRoom");
+            localStorage.removeItem("stabilizationProtocolRoom");
 
             // A new Standard Campaign resets its own artifact route and Realm status.
             // Practice, Legendary, and Score Attack must not erase Standard progress.
@@ -4783,7 +4784,7 @@ function showChancellorIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="../chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img">
+                <img src="../chancellor.webp" class="bossIcon chancellorGlow chancellor-dialogue-img" alt="The Custodian">
                 <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
                 <div class="chancellor-dialogue">
@@ -4806,7 +4807,7 @@ function showChancellorIntro(step = 1){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro">
-            <img src="../chancellor.webp" class="bossIcon chancellorGlow">
+            <img src="../chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
             <div class="chancellor-dialogue">
@@ -4856,7 +4857,7 @@ function showChancellorSuspenseIntro(){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro chancellor-suspense">
-            <img src="../chancellor.webp" class="bossIcon chancellorGlow">
+            <img src="../chancellor.webp" class="bossIcon chancellorGlow" alt="The Custodian">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
             <div class="chancellor-intro-line">Final authority recognized.</div>
         </div>
@@ -5314,23 +5315,23 @@ legendaryBoss: [
 ],
 	
 easyBoss: [
-{"id":2000,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"income_expenditure_identity","secondarySkills":["gdp_counting_rules"],"repairSkill":"income_expenditure_identity","commonError":"Treating spending and income as unrelated totals instead of two sides of the same transaction.","q":"The Sentinel opens the ledger and asks why GDP can be measured as both total income and total expenditure. What is the answer?","options":["Every dollar spent by a buyer becomes income for a seller","Income is always larger than expenditure","Exports are counted but imports are ignored","Prices do not affect GDP measurement"],"a":0,"tag":"gdp_income_expenditure","type":"boss_scaffold_definition","objective":"LO24.1","boss":"Sentinel","feedback":"GDP can be measured as income or expenditure because one person's spending becomes another person's income."},
-{"id":2001,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"income_expenditure_identity","secondarySkills":["circular_flow"],"repairSkill":"income_expenditure_identity","commonError":"Missing that one transaction creates both spending and income.","q":"A household pays $700 to a local mechanic for a repair. In the income-expenditure flow, what happens?","options":["Household spending becomes mechanic income","Mechanic income falls by $700","Only government purchases change","GDP falls because services are excluded"],"a":0,"tag":"gdp_income_expenditure","type":"boss_scaffold_application","objective":"LO24.1","boss":"Sentinel","feedback":"The household's expenditure becomes income for the mechanic."},
-{"id":2002,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"income_expenditure_identity","secondarySkills":["gdp_identity"],"repairSkill":"income_expenditure_identity","commonError":"Thinking total income and total expenditure are separate unrelated amounts.","q":"If total expenditure on final goods and services is $22 trillion, what should total income equal in the basic GDP identity?","options":["$22 trillion","$11 trillion","$44 trillion","It cannot be compared"],"a":0,"tag":"gdp_income_expenditure","type":"boss_scaffold_synthesis","objective":"LO24.1","boss":"Sentinel","feedback":"In the basic GDP identity, total income equals total expenditure, so both are $22 trillion."},
-{"id":2003,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"gdp_counting_rules","secondarySkills":["final_goods_services"],"repairSkill":"gdp_counting_rules","commonError":"Counting used goods, financial assets, or transfers as current production.","q":"The Sentinel asks which transaction belongs in current GDP. Which one counts?","options":["A newly built house sold this year","A used car resold this year","A share of stock purchased this year","A cash gift from one household to another"],"a":0,"tag":"gdp_definition","type":"boss_scaffold_definition","objective":"LO24.2","boss":"Sentinel","feedback":"GDP counts newly produced final goods and services in the current period."},
-{"id":2004,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"gdp_counting_rules","secondarySkills":["current_production"],"repairSkill":"gdp_counting_rules","commonError":"Counting resale transactions as new production.","q":"Why is a used car sale usually not counted in current GDP?","options":["The car was counted when it was first produced","Cars are never counted in GDP","Only government purchases count in GDP","Used goods are counted twice by rule"],"a":0,"tag":"gdp_definition","type":"boss_scaffold_application","objective":"LO24.2","boss":"Sentinel","feedback":"Used goods are not counted again because they were counted when they were first produced."},
-{"id":2005,"difficulty":"easyBoss","conceptCluster":"gdp_measurement","primarySkill":"intermediate_vs_final_goods","secondarySkills":["avoid_double_counting"],"repairSkill":"intermediate_vs_final_goods","commonError":"Double-counting intermediate goods instead of counting the final good.","q":"A bakery buys flour for $50 and sells bread to consumers for $140. How much is counted in GDP from the final bread sale?","options":["$140","$50","$190","$90"],"a":0,"tag":"gdp_definition","type":"boss_scaffold_synthesis","objective":"LO24.2","boss":"Sentinel","feedback":"GDP counts the final good, so the bread sale contributes $140."},
-{"id":2006,"difficulty":"easyBoss","conceptCluster":"gdp_components","primarySkill":"gdp_components_identity","secondarySkills":["expenditure_approach"],"repairSkill":"gdp_components_identity","commonError":"Forgetting the C + I + G + NX expenditure identity.","q":"The Sentinel points to the spending ledger. Which formula correctly gives GDP?","options":["Y = C + I + G + NX","Y = C - I + G - NX","Y = wages + CPI + imports","Y = inflation + unemployment"],"a":0,"tag":"gdp_components","type":"boss_scaffold_definition","objective":"LO24.3","boss":"Sentinel","feedback":"GDP expenditure equals consumption plus investment plus government purchases plus net exports."},
-{"id":2007,"difficulty":"easyBoss","conceptCluster":"gdp_components","primarySkill":"gdp_components_identity","secondarySkills":["investment_component"],"repairSkill":"gdp_components_identity","commonError":"Confusing business investment with household consumption.","q":"A firm buys a new machine to produce more output. Which GDP component does this enter?","options":["Investment","Consumption","Government purchases","Net exports"],"a":0,"tag":"gdp_components","type":"boss_scaffold_application","objective":"LO24.3","boss":"Sentinel","feedback":"Business purchases of new capital goods are counted as investment."},
-{"id":2008,"difficulty":"easyBoss","conceptCluster":"gdp_components","primarySkill":"gdp_components_identity","secondarySkills":["imports_exports_nx"],"repairSkill":"gdp_components_identity","commonError":"Forgetting to subtract imports through net exports.","q":"If C = 9, I = 3, G = 4, and NX = -2, what is GDP?","options":["14","16","18","10"],"a":0,"tag":"gdp_components","type":"boss_scaffold_synthesis","objective":"LO24.3","boss":"Sentinel","feedback":"GDP = 9 + 3 + 4 - 2 = 14."},
-{"id":2009,"difficulty":"easyBoss","conceptCluster":"real_nominal_gdp","primarySkill":"nominal_vs_real_gdp","secondarySkills":["current_prices"],"repairSkill":"nominal_vs_real_gdp","commonError":"Mixing up current-year and base-year prices.","q":"The Sentinel asks which prices nominal GDP uses. What is the answer?","options":["Current-year prices","Base-year prices","Only import prices","Only wage prices"],"a":0,"tag":"real_nominal_gdp","type":"boss_scaffold_definition","objective":"LO24.4","boss":"Sentinel","feedback":"Nominal GDP values output using current-year prices."},
-{"id":2010,"difficulty":"easyBoss","conceptCluster":"real_nominal_gdp","primarySkill":"nominal_vs_real_gdp","secondarySkills":["base_year_prices"],"repairSkill":"nominal_vs_real_gdp","commonError":"Thinking real GDP ignores output changes.","q":"Why is real GDP useful?","options":["It removes price changes by using base-year prices","It counts used goods again","It ignores changes in production","It measures only imports"],"a":0,"tag":"real_nominal_gdp","type":"boss_scaffold_application","objective":"LO24.4","boss":"Sentinel","feedback":"Real GDP helps isolate changes in actual production by holding prices constant."},
-{"id":2011,"difficulty":"easyBoss","conceptCluster":"real_nominal_gdp","primarySkill":"gdp_deflator","secondarySkills":["nominal_vs_real_gdp"],"repairSkill":"gdp_deflator","commonError":"Dividing real GDP by nominal GDP instead of nominal by real.","q":"If nominal GDP is $120 and real GDP is $100, what is the GDP deflator?","options":["120","100","83.3","20"],"a":0,"tag":"real_nominal_gdp","type":"boss_scaffold_synthesis","objective":"LO24.4","boss":"Sentinel","feedback":"GDP deflator = nominal GDP / real GDP x 100, so 120/100 x 100 = 120."},
-{"id":2012,"difficulty":"easyBoss","conceptCluster":"gdp_wellbeing","primarySkill":"gdp_wellbeing_limits","secondarySkills":["quality_of_life"],"repairSkill":"gdp_wellbeing_limits","commonError":"Treating GDP as a perfect measure of social welfare.","q":"The Sentinel asks whether GDP is a perfect measure of well-being. What is the best answer?","options":["No, GDP misses things like leisure, pollution, and inequality","Yes, GDP measures every part of quality of life","Yes, GDP includes all unpaid household work","No, GDP measures only unemployment"],"a":0,"tag":"gdp_wellbeing","type":"boss_scaffold_definition","objective":"LO24.5","boss":"Sentinel","feedback":"GDP is useful, but it misses important parts of well-being such as leisure, environmental quality, and inequality."},
-{"id":2013,"difficulty":"easyBoss","conceptCluster":"gdp_wellbeing","primarySkill":"gdp_wellbeing_limits","secondarySkills":["nonmarket_activity"],"repairSkill":"gdp_wellbeing_limits","commonError":"Assuming all valuable activity is counted in GDP.","q":"A parent provides unpaid childcare at home. Why is this not counted in GDP?","options":["It is valuable but not bought and sold in a market","It is illegal production","It is an imported service","It is counted as government purchases"],"a":0,"tag":"gdp_wellbeing","type":"boss_scaffold_application","objective":"LO24.5","boss":"Sentinel","feedback":"Unpaid household production can improve well-being, but it is usually not counted in GDP because no market transaction occurs."},
-{"id":2014,"difficulty":"easyBoss","conceptCluster":"gdp_wellbeing","primarySkill":"gdp_wellbeing_limits","secondarySkills":["gdp_interpretation"],"repairSkill":"gdp_wellbeing_limits","commonError":"Reading higher GDP as automatically higher well-being in every dimension.","q":"GDP rises because factories produce more, but pollution worsens and leisure falls. What should the Sentinel conclude?","options":["GDP rose, but well-being may not have improved by the same amount","GDP must be wrong because pollution rose","GDP must include the value of cleaner air","GDP fell because leisure is always counted"],"a":0,"tag":"gdp_wellbeing","type":"boss_scaffold_synthesis","objective":"LO24.5","boss":"Sentinel","feedback":"GDP can rise while some parts of well-being worsen. That is the trap students need to catch."}
+{ id: 2000, q: "Which statement correctly describes fiat money?", options: ["It has value because people accept it and government supports its use.", "It has value because the material itself is valuable.", "It can only serve as a store of value.", "It is excluded from the money supply."], a: 0, tag: "forms_of_money", type: "boss_scaffold_definition", objective: "30.1", difficulty: "easyboss", conceptCluster: "money_basics", primarySkill: "identify_fiat_money", secondarySkills: ["forms_of_money"], repairSkill: "fiat_money_definition", commonError: "thinking fiat money must have intrinsic value", feedback: "Fiat money does not need intrinsic value. It works because people accept it." },
+{ id: 2001, q: "A person uses dollars to buy groceries, compare prices, and save for next month. Which functions of money are being used?", options: ["Medium of exchange, unit of account, and store of value", "Store of value only", "Unit of account only", "Reserve requirement and money multiplier"], a: 0, tag: "money_functions", type: "boss_scaffold_application", objective: "30.1", difficulty: "easyboss", conceptCluster: "money_basics", primarySkill: "match_money_functions_to_context", secondarySkills: ["medium_of_exchange", "unit_of_account", "store_of_value"], repairSkill: "functions_of_money", commonError: "thinking money only has one function at a time", feedback: "Buying, comparing prices, and saving line up with the three core functions of money." },
+{ id: 2002, q: "Currency held by the public is $900, checkable deposits are $1,100, savings deposits are $1,500, and small time deposits are $500. What are M1 and M2?", options: ["M1 = $2,000; M2 = $4,000", "M1 = $900; M2 = $2,900", "M1 = $1,100; M2 = $3,100", "M1 = $2,000; M2 = $2,000"], a: 0, tag: "money_measures", type: "boss_scaffold_synthesis", objective: "30.1", difficulty: "easyboss", conceptCluster: "money_supply_measures", primarySkill: "calculate_m1_m2", secondarySkills: ["currency", "checkable_deposits", "near_money"], repairSkill: "m1_m2_components", commonError: "forgetting M2 includes M1 plus near monies", feedback: "M1 is $900 + $1,100 = $2,000. M2 adds savings and small time deposits, so M2 = $4,000." },
+{ id: 2003, q: "The Federal Reserve is best described as", options: ["the central bank of the United States", "the agency that writes federal spending bills", "the agency that collects income taxes", "a private household lender"], a: 0, tag: "federal_reserve", type: "boss_scaffold_definition", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "identify_fed_role", secondarySkills: ["central_bank"], repairSkill: "fed_role", commonError: "confusing the Fed with fiscal agencies", feedback: "The Fed is the U.S. central bank. It handles monetary policy, not tax law." },
+{ id: 2004, q: "The FOMC is most directly connected to", options: ["open-market operations and monetary policy", "writing the federal budget", "calculating the CPI", "setting income tax brackets"], a: 0, tag: "federal_reserve", type: "boss_scaffold_application", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "connect_fomc_to_policy", secondarySkills: ["open_market_operations", "monetary_policy"], repairSkill: "fomc_role", commonError: "confusing FOMC actions with fiscal policy", feedback: "The FOMC conducts monetary policy largely through open-market operations." },
+{ id: 2005, q: "A central bank faces political pressure to expand money before an election. Why does central bank independence matter here?", options: ["It can reduce short-run political pressure for excessive money growth.", "It lets the Fed set income tax rates.", "It prevents all inflation forever.", "It makes banks stop lending."], a: 0, tag: "federal_reserve", type: "boss_scaffold_synthesis", objective: "30.2", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "explain_fed_independence", secondarySkills: ["political_pressure", "money_growth"], repairSkill: "fed_independence", commonError: "thinking Fed independence has nothing to do with inflation risk", feedback: "Independence can help keep monetary policy from being pushed around for short-run political gain." },
+{ id: 2006, q: "In a fractional reserve system, banks", options: ["hold part of deposits as reserves and lend the rest", "must hold 100 percent of deposits as reserves", "cannot affect the money supply", "create money by printing currency"], a: 0, tag: "banking_system", type: "boss_scaffold_definition", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "identify_fractional_reserve_banking", secondarySkills: ["reserves", "lending"], repairSkill: "fractional_reserve_definition", commonError: "thinking banks create money by printing cash", feedback: "Banks create deposits through lending, not by printing currency." },
+{ id: 2007, q: "A bank has $800,000 in deposits, $110,000 in reserves, and a 10 percent reserve requirement. How much can it lend?", options: ["$30,000", "$80,000", "$110,000", "$690,000"], a: 0, tag: "excess_reserves", type: "boss_scaffold_calculation", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "calculate_excess_reserves", secondarySkills: ["required_reserves", "actual_reserves"], repairSkill: "excess_reserves_formula", commonError: "treating all reserves as lendable reserves", feedback: "Required reserves are $80,000. Excess reserves are $110,000 - $80,000 = $30,000." },
+{ id: 2008, q: "A new $5,000 deposit enters a banking system with a 20 percent reserve requirement. What is the first bank's initial loan and the simple maximum total deposit expansion?", options: ["Initial loan = $4,000; total expansion = $25,000", "Initial loan = $1,000; total expansion = $5,000", "Initial loan = $5,000; total expansion = $25,000", "Initial loan = $4,000; total expansion = $20,000"], a: 0, tag: "money_multiplier_banking", type: "boss_scaffold_synthesis", objective: "30.3", difficulty: "easyboss", conceptCluster: "bank_money_creation", primarySkill: "combine_lending_and_multiplier", secondarySkills: ["reserve_ratio", "excess_reserves", "money_multiplier"], repairSkill: "money_multiplier_application", commonError: "confusing first-round lending with total deposit expansion", feedback: "The bank lends $4,000. The multiplier is 1/0.20 = 5, so total expansion can reach $25,000." },
+{ id: 2009, q: "If the Fed buys government bonds, the money supply tends to", options: ["increase", "decrease", "stay fixed", "turn into commodity money"], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_definition", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "identify_open_market_direction", secondarySkills: ["bond_purchase", "money_supply"], repairSkill: "fed_buys_bonds_money_supply", commonError: "thinking bond purchases remove money from circulation", feedback: "Buying bonds injects reserves and tends to increase the money supply." },
+{ id: 2010, q: "If the Fed wants to reduce the money supply using open-market operations, what should it do?", options: ["Sell government bonds.", "Buy government bonds.", "Lower reserve requirements.", "Lower the discount rate."], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_application", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "select_contractionary_tool", secondarySkills: ["bond_sale", "money_supply"], repairSkill: "fed_sells_bonds_money_supply", commonError: "thinking bond sales add reserves", feedback: "Selling bonds pulls money out of the banking system and contracts the money supply." },
+{ id: 2011, q: "The Fed sells $20 million in bonds and the money multiplier is 5. Under the simple model, what is the maximum decrease in the money supply?", options: ["$100 million", "$20 million", "$4 million", "$25 million"], a: 0, tag: "monetary_policy_tools", type: "boss_scaffold_synthesis", objective: "30.4", difficulty: "easyboss", conceptCluster: "central_banking", primarySkill: "apply_bond_sale_multiplier", secondarySkills: ["open_market_operations", "money_multiplier"], repairSkill: "fed_sells_bonds_money_supply", commonError: "dividing by the multiplier instead of multiplying", feedback: "A $20 million bond sale times multiplier 5 gives a maximum $100 million money-supply decrease." },
+{ id: 2012, q: "Why is the Fed's control over the money supply imperfect?", options: ["Banks may hold excess reserves and the public may hold currency.", "The Fed cannot influence reserves.", "Banks cannot lend money.", "Currency is not money."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_definition", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "identify_control_limit", secondarySkills: ["excess_reserves", "currency_holdings"], repairSkill: "limits_of_monetary_control", commonError: "assuming Fed control is mechanically perfect", feedback: "The Fed can influence money creation, but banks and the public also matter." },
+{ id: 2013, q: "The Fed injects reserves, but banks choose not to lend because they are worried about risk. What happens relative to the simple multiplier?", options: ["Money creation is weaker than predicted.", "Money creation is stronger than predicted.", "The money supply must fall to zero.", "The simple multiplier becomes infinite."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_application", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "explain_excess_reserve_limit", secondarySkills: ["bank_behavior", "money_multiplier"], repairSkill: "actual_vs_simple_multiplier", commonError: "thinking reserves automatically become loans", feedback: "If banks hold reserves instead of lending, deposit creation is weaker than the simple multiplier predicts." },
+{ id: 2014, q: "The Fed buys bonds, banks hold some excess reserves, and households keep some proceeds as currency. What is the best conclusion?", options: ["The money supply rises by less than the simple multiplier predicts.", "The money supply rises by exactly the simple multiplier amount.", "The money supply must fall because households hold currency.", "The Fed has perfect control over final money creation."], a: 0, tag: "monetary_control_limits", type: "boss_scaffold_synthesis", objective: "30.5", difficulty: "easyboss", conceptCluster: "monetary_policy_limits", primarySkill: "synthesize_multiplier_leakages", secondarySkills: ["excess_reserves", "currency_drain", "open_market_operations"], repairSkill: "actual_vs_simple_multiplier", commonError: "treating the simple multiplier as guaranteed", feedback: "Excess reserves and currency drain both weaken the multiplier. The Fed is powerful, not magical." }
 ],
-
+   
 mediumBoss: [
 {"id":3000,"difficulty":"mediumBoss","conceptCluster":"phillips_curve","primarySkill":"define_phillips_curve","secondarySkills":["short_run_tradeoff"],"repairSkill":"define_phillips_curve","commonError":"Confusing the Phillips curve with the AD-AS model.","q":"The Regent asks what the short-run Phillips curve shows. What is the answer?","options":["A short-run tradeoff between inflation and unemployment","A long-run tradeoff between inflation and output","A fixed relationship between money supply and GDP","A direct measure of government spending"],"a":0,"tag":"phillips_curve","type":"boss_scaffold_definition","objective":"LO36.1","boss":"Expectations Regent","feedback":"The short-run Phillips curve shows that lower unemployment is associated with higher inflation, and higher unemployment is associated with lower inflation."},
 {"id":3001,"difficulty":"mediumBoss","conceptCluster":"phillips_curve","primarySkill":"move_along_srpc","secondarySkills":["short_run_tradeoff"],"repairSkill":"move_along_srpc","commonError":"Reversing the short-run inflation-unemployment tradeoff.","q":"The Regent sees expansionary policy raise aggregate demand. In the short run, what Phillips curve movement should follow?","options":["Lower inflation and higher unemployment","Higher inflation and lower unemployment","Higher inflation and higher unemployment","Lower inflation and lower unemployment"],"a":1,"tag":"policy_phillips","type":"boss_scaffold_application","objective":"LO36.1","boss":"Expectations Regent","feedback":"Expansionary policy raises AD, which can lower unemployment but raises inflation in the short run."},
@@ -5884,19 +5885,12 @@ connect_output_unemployment:[{"id":5068,"q":"Repair check: When real output is b
 define_stagflation:[{"id":5069,"q":"Repair check: Stagflation combines:","options":["High inflation and high unemployment","Low inflation and low unemployment","Rapid growth and falling prices","Balanced budgets and low interest rates"],"a":0,"tag":"supply_shocks","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"define_stagflation","repairSkill":"define_stagflation","feedback":"Stagflation is the difficult combination of rising prices and weak employment/output conditions."}],
 deposit_creation:[{"id":5070,"q":"Repair check: When a bank makes a loan from excess reserves, what can happen next?","options":["The loan can become a deposit elsewhere and support further lending","The money supply must shrink immediately","Required reserves disappear","The loan stops being an asset"],"a":0,"tag":"money_creation","type":"repair","objective":"LO30.3","difficulty":"microRepair","primarySkill":"deposit_creation","repairSkill":"deposit_creation","feedback":"Loans can become deposits at other banks, allowing the deposit-creation process to continue."}],
 fiscal_policy_magnitude:[{"id":5071,"q":"Repair check: Why might a tax cut have a smaller immediate effect than an equal increase in government purchases?","options":["Households may save part of the tax cut","Tax cuts never affect AD","Government purchases are not part of GDP","Taxes shift SRAS directly"],"a":0,"tag":"fiscal_policy","type":"repair","objective":"LO35.4","difficulty":"microRepair","primarySkill":"fiscal_policy_magnitude","repairSkill":"fiscal_policy_magnitude","feedback":"Some of a tax cut is saved, so its initial spending effect can be smaller than direct government purchases."}],
-gdp_components_identity:[{"id":5072,"q":"Repair check: Which expression gives expenditure-side GDP?","options":["C + I + G + NX","C + S + T","M1 + M2","Wages + prices + interest"],"a":0,"tag":"gdp_components","type":"repair","objective":"LO24.3","difficulty":"microRepair","primarySkill":"gdp_components_identity","repairSkill":"gdp_components_identity","feedback":"Expenditure GDP is consumption plus investment plus government purchases plus net exports."}],
-gdp_counting_rules:[{"id":5073,"q":"Repair check: Which transaction is counted in current GDP?","options":["A newly produced U.S.-made bicycle sold this year","A used bicycle resold this year","A purchase of company stock","A neighbor's unpaid childcare"],"a":0,"tag":"gdp_definition","type":"repair","objective":"LO24.2","difficulty":"microRepair","primarySkill":"gdp_counting_rules","repairSkill":"gdp_counting_rules","feedback":"GDP counts current market production of final goods and services, not used goods, financial trades, or unpaid work."}],
-gdp_deflator:[{"id":5074,"q":"Repair check: Nominal GDP is $150 billion and real GDP is $125 billion. What is the GDP deflator?","options":["120","83.3","125","150"],"a":0,"tag":"real_nominal_gdp","type":"repair","objective":"LO24.4","difficulty":"microRepair","primarySkill":"gdp_deflator","repairSkill":"gdp_deflator","feedback":"GDP deflator = nominal GDP / real GDP × 100 = 150 / 125 × 100 = 120."}],
-gdp_wellbeing_limits:[{"id":5075,"q":"Repair check: Why is GDP not a complete measure of well-being?","options":["It omits factors such as leisure, environmental quality, and some nonmarket activity","It never measures production","It counts only imports","It is identical to the unemployment rate"],"a":0,"tag":"gdp_wellbeing","type":"repair","objective":"LO24.5","difficulty":"microRepair","primarySkill":"gdp_wellbeing_limits","repairSkill":"gdp_wellbeing_limits","feedback":"GDP measures market production, not every contributor to living standards."}],
 identify_natural_output:[{"id":5076,"q":"Repair check: On an AD-AS graph, natural output is the output level where:","options":["Real GDP equals potential output","Inflation is zero","AD is vertical","Unemployment is zero"],"a":0,"tag":"lras","type":"repair","objective":"LO34.5","difficulty":"microRepair","primarySkill":"identify_natural_output","repairSkill":"identify_natural_output","feedback":"Natural output is potential output, the economy's sustainable long-run production level."}],
 identify_natural_unemployment:[{"id":5077,"q":"Repair check: The natural rate of unemployment includes:","options":["Frictional and structural unemployment","Only cyclical unemployment","No unemployment at all","Only discouraged workers"],"a":0,"tag":"lrpc","type":"repair","objective":"LO36.2","difficulty":"microRepair","primarySkill":"identify_natural_unemployment","repairSkill":"identify_natural_unemployment","feedback":"The natural rate remains even at potential output because frictional and structural unemployment persist."}],
-income_expenditure_identity:[{"id":5078,"q":"Repair check: Why are total income and total expenditure equal for the economy as a whole?","options":["One person's spending becomes another person's income","Imports are always zero","Households spend every dollar","Government sets both totals"],"a":0,"tag":"gdp_income_expenditure","type":"repair","objective":"LO24.1","difficulty":"microRepair","primarySkill":"income_expenditure_identity","repairSkill":"income_expenditure_identity","feedback":"Every market transaction records spending by a buyer and income for a seller."}],
 inflation_redistribution:[{"id":5079,"q":"Repair check: Unexpected inflation redistributes wealth toward borrowers when:","options":["Loans have fixed nominal payments","All loans adjust instantly with inflation","Interest rates are always zero","Prices never change"],"a":0,"tag":"inflation_redistribution","type":"repair","objective":"LO31.4","difficulty":"microRepair","primarySkill":"inflation_redistribution","repairSkill":"inflation_redistribution","feedback":"Unexpected inflation lowers the real value of fixed nominal repayments, helping borrowers and hurting lenders."}],
 interest_on_reserves_policy:[{"id":5080,"q":"Repair check: Raising the interest rate paid on bank reserves tends to:","options":["Encourage banks to hold reserves rather than lend","Force banks to lend all reserves","Raise the money multiplier automatically","Shift SRAS right"],"a":0,"tag":"interest_on_reserves","type":"repair","objective":"LO30.4","difficulty":"microRepair","primarySkill":"interest_on_reserves_policy","repairSkill":"interest_on_reserves_policy","feedback":"A higher return on reserves increases the incentive to hold reserves, which can restrain lending."}],
-intermediate_vs_final_goods:[{"id":5081,"q":"Repair check: Why is flour sold to a bakery usually not counted separately from the bread in GDP?","options":["Counting both would double count the flour's value","Flour is never produced","Bread is not a final good","GDP excludes all food"],"a":0,"tag":"gdp_definition","type":"repair","objective":"LO24.2","difficulty":"microRepair","primarySkill":"intermediate_vs_final_goods","repairSkill":"intermediate_vs_final_goods","feedback":"The flour's value is included in the final bread price, so counting both would double count production."}],
 monetary_policy_ad_shift:[{"id":5082,"q":"Repair check: If the Fed decreases the money supply, aggregate demand usually:","options":["Shifts left as interest rates rise and spending falls","Shifts right as interest rates fall","Does not change under any circumstance","Becomes vertical"],"a":0,"tag":"monetary_policy","type":"repair","objective":"LO35.2","difficulty":"microRepair","primarySkill":"monetary_policy_ad_shift","repairSkill":"monetary_policy_ad_shift","feedback":"Contractionary monetary policy tends to raise interest rates and reduce interest-sensitive spending, shifting AD left."}],
 nominal_real_interest_rate:[{"id":5083,"q":"Repair check: A nominal interest rate is 8 percent and inflation is 3 percent. The approximate real interest rate is:","options":["5 percent","11 percent","8 percent","-5 percent"],"a":0,"tag":"fisher_effect","type":"repair","objective":"LO31.3","difficulty":"microRepair","primarySkill":"nominal_real_interest_rate","repairSkill":"nominal_real_interest_rate","feedback":"Approximate real interest equals nominal interest minus inflation: 8% − 3% = 5%."}],
-nominal_vs_real_gdp:[{"id":5084,"q":"Repair check: Real GDP differs from nominal GDP because real GDP:","options":["Uses constant prices to isolate changes in output","Includes only services","Excludes investment","Uses current prices only"],"a":0,"tag":"real_nominal_gdp","type":"repair","objective":"LO24.4","difficulty":"microRepair","primarySkill":"nominal_vs_real_gdp","repairSkill":"nominal_vs_real_gdp","feedback":"Real GDP values output using base-year prices, separating quantity changes from price changes."}],
 read_ad_as_axes:[{"id":5085,"q":"Repair check: The vertical axis on a standard AD-AS graph measures:","options":["The price level","Real GDP","The unemployment rate","The nominal interest rate"],"a":0,"tag":"ad_as_basics","type":"repair","objective":"LO34.1","difficulty":"microRepair","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","feedback":"AD-AS graphs place the price level on the vertical axis and real output on the horizontal axis."}],
 read_ad_as_equilibrium:[{"id":5086,"q":"Repair check: In an AD-AS graph, short-run equilibrium occurs where:","options":["Aggregate demand intersects short-run aggregate supply","AD intersects LRAS only","The price level is zero","Unemployment is zero"],"a":0,"tag":"ad_as_graph_interpretation","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"read_ad_as_equilibrium","repairSkill":"read_ad_as_equilibrium","feedback":"The intersection of AD and SRAS determines the short-run equilibrium price level and real output."}],
 read_ad_shift:[{"id":5087,"q":"Repair check: A rightward shift of aggregate demand means:","options":["Planned spending is higher at each price level","The price level has moved along AD","Short-run aggregate supply shifted left","Potential output fell"],"a":0,"tag":"aggregate_demand","type":"repair","objective":"LO34.1","difficulty":"microRepair","primarySkill":"read_ad_shift","repairSkill":"read_ad_shift","feedback":"A shift in AD changes total planned spending at every price level."}],
@@ -6289,9 +6283,9 @@ function updateMazeTrack() {
             box.innerText = "🟨";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="sentinel.webp" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="regent.webp" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="../chancellor.webp" class="boss-icon">';box.classList.add("boss30");}
+            if (i === 10){box.innerHTML = '<img src="sentinel.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="regent.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="../chancellor.webp" class="boss-icon" alt="" aria-hidden="true">';box.classList.add("boss30");}
             else box.innerText = "⬛";
         }
         
@@ -6458,6 +6452,15 @@ document.addEventListener("click", function(event){
 });
 
 document.addEventListener("keydown", function(event){
+    const target = event.target;
+    const graphImg = target && target.matches ? target.matches("#questionImageBox img") : false;
+
+    if(graphImg && (event.key === "Enter" || event.key === " ")){
+        event.preventDefault();
+        openGraphLightbox(target.src, target.alt);
+        return;
+    }
+
     if(event.key === "Escape"){
         closeGraphLightbox();
     }
@@ -6604,7 +6607,7 @@ if (isBoss) {
     currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
     if (currentQuestion.image) {
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6639,12 +6642,12 @@ if (isBoss) {
         bossClass = "regentGlow";
     }
     else {
-        bossImage = "chancellor.webp";
+        bossImage = "../chancellor.webp";
         bossClass = "chancellorGlow";
     }
 
     questionElement.innerHTML = `
-        <img src="${bossImage}" class="bossIcon ${bossClass}">
+        <img src="${bossImage}" class="bossIcon ${bossClass}" alt="${bTitle}">
         <span class="boss-title" style="color:${bColor}">${bTitle}</span>
         <div class="boss-q" style="--bossColor:${bColor}">
             ${currentQuestion.q}
@@ -6675,7 +6678,7 @@ if (isBoss) {
     );
 
     if(currentQuestion.image){
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -6751,7 +6754,7 @@ else{
 }
 		
 if(currentQuestion.image){
-    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge" role="button" tabindex="0" aria-label="Open expanded question graph"><div class="graph-zoom-note">Click graph to enlarge</div>`;
     imageBox.style.display = "block";
 }
 
@@ -7195,7 +7198,7 @@ if(modeAllowsRealmProgress()){
    timedHighestRoom = Math.max(timedHighestRoom, Math.min(room, 30));
    saveGameState();
    if(modeAllowsRealmProgress()){
-       localStorage.setItem("gauntletRoom", room);
+       localStorage.setItem("stabilizationProtocolRoom", room);
    }
 
    if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
@@ -7387,15 +7390,15 @@ function handleStreakVisuals() {
     let streakColor = "#f8d981";
 
     if (streak === 5) {
-        streakMsg = `<span class="streak"><img src="streakspark.webp" class="streak-icon">POLICY SPARK</span>`;
+        streakMsg = `<span class="streak"><img src="streakspark.webp" class="streak-icon" alt="" aria-hidden="true">POLICY SPARK</span>`;
         streakColor = "#38bdf8";
     }
     else if (streak === 10) {
-        streakMsg = `<span class="streak"><img src="streakpulse.webp" class="streak-icon">STABILIZATION PULSE</span>`;
+        streakMsg = `<span class="streak"><img src="streakpulse.webp" class="streak-icon" alt="" aria-hidden="true">STABILIZATION PULSE</span>`;
         streakColor = "#60a5fa";
     }
     else if (streak === 20) {
-        streakMsg = `<span class="streak"><img src="streakbeacon.webp" class="streak-icon">MANDATE BEACON</span>`;
+        streakMsg = `<span class="streak"><img src="streakbeacon.webp" class="streak-icon" alt="" aria-hidden="true">MANDATE BEACON</span>`;
         streakColor = "#f8d981";
     }
 
@@ -7463,6 +7466,7 @@ function showArtifact(img,title,text){
     let p = document.getElementById("artifactText");
 
     image.src = img;
+    image.alt = title;
     t.innerText = title;
     p.innerText = text;
 
@@ -7800,7 +7804,7 @@ function handlePracticeModeComplete(){
 // It is a lightweight integrity check.
 // =============================================
 function generateCode(name, acc, streak, total){
-    let str = `${name}|${acc}|${streak}|${total}|LEDGER55`;
+    let str = `${name}|${acc}|${streak}|${total}|PROTOCOL36`;
     let hash = 0;
 
     for(let i = 0; i < str.length; i++){
@@ -8115,14 +8119,14 @@ function shuffleArray(arr){
 // Clearing browser data will erase scores.
 // =============================================
 function updateHighScores(newTimeMs) {
-    let scores = JSON.parse(localStorage.getItem("gauntletHighScores")) || [];
+    let scores = JSON.parse(localStorage.getItem("stabilizationProtocolHighScores")) || [];
     scores.push({ name: username, time: newTimeMs, date: new Date().toLocaleDateString() });
     
     // Sort by time (lowest/fastest first) and keep top 5
     scores.sort((a, b) => a.time - b.time);
     scores = scores.slice(0, 5);
     
-    localStorage.setItem("gauntletHighScores", JSON.stringify(scores));
+    localStorage.setItem("stabilizationProtocolHighScores", JSON.stringify(scores));
     return scores;
 }
 
@@ -8785,9 +8789,6 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
-
-
-
 
 
 
