@@ -1,4 +1,4 @@
-﻿/* Faculty-editable instructional-resource catalog for The Stabilization Protocol. */
+/* Faculty-editable instructional-resource catalog for The Stabilization Protocol. */
 (function registerStabilizationProtocolResources(global) {
 "use strict";
 if (global.STABILIZATION_PROTOCOL_INSTRUCTIONAL_RESOURCES) return;
