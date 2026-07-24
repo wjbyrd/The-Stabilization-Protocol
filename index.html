@@ -206,7 +206,6 @@ body::after{
 }
 
 /* PLACEHOLDER */	
-#emailInput::placeholder,
 #username::placeholder{
     color: rgba(216,199,160,0.52);
     font-style: italic;
@@ -2610,7 +2609,9 @@ body.game-active #soundToggle {
     .mastery-row-score{ white-space:normal; }
 }
 
+.resource-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}.resource-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid rgba(251,191,36,.42);border-radius:11px;background:radial-gradient(circle at top,rgba(245,158,11,.16),rgba(30,18,8,.9) 62%,rgba(2,6,23,.98));box-shadow:0 0 16px rgba(245,158,11,.14),inset 0 0 18px rgba(0,0,0,.48);color:#fff8e7;text-decoration:none;}.resource-card:hover,.resource-card:focus{border-color:#f7d982;box-shadow:0 0 22px rgba(247,217,130,.32),inset 0 0 18px rgba(0,0,0,.48);}.resource-type{color:#c7ecff;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;}.resource-title{color:#f7d982;font-weight:900;line-height:1.25;}.resource-description{color:rgba(238,248,255,.84);font-size:12px;line-height:1.4;}.resource-action{margin-top:auto;color:#fff8e7;font-size:12px;font-weight:800;}@media(max-width:768px){#gameShell{border-color:rgba(251,191,36,.30);box-shadow:0 0 24px rgba(0,0,0,.90),0 0 38px rgba(245,158,11,.14),inset 0 0 30px rgba(0,0,0,.78);}#gameBox{padding:10px;background:radial-gradient(circle at center,rgba(245,158,11,.12) 0%,rgba(15,23,42,.60) 46%,rgba(30,18,8,.94) 74%,rgba(2,6,23,.99) 100%);border-color:rgba(251,191,36,.36);box-shadow:0 0 22px rgba(245,158,11,.18),0 0 58px rgba(56,189,248,.10),0 0 72px rgba(15,23,42,.72),inset 0 0 42px rgba(0,0,0,.78);}.mastery-report-screen{padding:12px;color:#fff8e7;}.mastery-stat-card,.mastery-section{background:radial-gradient(circle at top,rgba(245,158,11,.14),rgba(30,18,8,.84) 45%,rgba(2,6,23,.96));border-color:rgba(247,217,130,.34);}.resource-card-grid{grid-template-columns:1fr;}.resource-card{padding:12px;}}
 </style>
+<script src="instructional_resources.js"></script>
 </head>
 
 <!-- =========================================
@@ -2682,7 +2683,6 @@ Respect structure strictly.
 <div id="startScreen">
   <div class="start-content">
     <h1 class="title">THE STABILIZATION PROTOCOL</h1>
-    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input" aria-label="School email">
     <button class="start-btn" onclick="showModeSelect()">ENTER THE PROTOCOL</button>
     <button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
         CONTINUE STANDARD RUN
@@ -2995,11 +2995,13 @@ let bossCheckpoint = 1;
 let correctAnswers = 0; 
 let maxStreak = 0; 
 let username = "";
-let studentEmail = "";
 let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
 let startTime; // Will be set in startGame()
+let finalElapsedTimeMs = null;
+function getElapsedTimeMs(){ return finalElapsedTimeMs !== null ? finalElapsedTimeMs : (startTime ? Math.max(0, Date.now() - startTime) : 0); }
+function freezeCompletionTime(){ if(finalElapsedTimeMs === null) finalElapsedTimeMs = getElapsedTimeMs(); return finalElapsedTimeMs; }
 let room = localStorage.getItem("stabilizationProtocolRoom") ? parseInt(localStorage.getItem("stabilizationProtocolRoom")) : 1;
 let currentQuestion = null;
 let detourActive = false;
@@ -3419,8 +3421,7 @@ function saveGameState(){
         maxStreak,
         streak,
         username,
-        studentEmail,
-        runID,
+runID,
         gameMode,
         conceptMemory,
         masteryState,
@@ -3474,8 +3475,7 @@ function loadSavedGame(){
         streak = Number(saveData.streak || 0);
 
         username = saveData.username || username || "";
-        studentEmail = saveData.studentEmail || studentEmail || "";
-        runID = saveData.runID || runID || "";
+runID = saveData.runID || runID || "";
         gameMode = saveData.gameMode || gameMode || "standard";
 
         conceptMemory = saveData.conceptMemory || {};
@@ -3516,7 +3516,7 @@ function clearSavedGame(){
     }
 }
 
-function generatePseudonymFromEmail(email) {
+function generatePseudonymFromSeed(seed) {
     const titles = [
         "Axiom", "Grid", "Vector", "Meridian", "Signal", "Cipher",
         "Frontier", "Equity", "Oracle", "Index", "Summit", "Nexus",
@@ -3530,10 +3530,10 @@ function generatePseudonymFromEmail(email) {
     ];
 
     let hash = 0;
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanSeed = String(seed || "").trim().toLowerCase();
 
-    for (let i = 0; i < cleanEmail.length; i++) {
-        hash = ((hash << 5) - hash) + cleanEmail.charCodeAt(i);
+    for (let i = 0; i < cleanSeed.length; i++) {
+        hash = ((hash << 5) - hash) + cleanSeed.charCodeAt(i);
         hash |= 0;
     }
 
@@ -4670,21 +4670,8 @@ function getStabilizationProtocolBossLine({ isCorrect, tag, type, objective, str
 
 
 
-const savedEmail = localStorage.getItem("gauntletEmail");
-const emailInput = document.getElementById("emailInput");
-if (savedEmail && emailInput) emailInput.value = savedEmail;
-function hasSavedGame(mode = "standard"){ return !!localStorage.getItem(`${SAVE_KEY}_${mode}`); }
-function validateAndStoreEmailForModeSelect(){
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-    if (!inputEmail) { alert("An email is required to enter the Protocol."); return false; }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(inputEmail)) { alert("Enter a valid email address."); return false; }
-    studentEmail = inputEmail; username = generatePseudonymFromEmail(studentEmail);
-    localStorage.setItem("gauntletEmail", studentEmail); localStorage.setItem("gauntletUser", username); return true;
-}
-	 
+function hasSavedGame(mode = "standard"){ return !!localStorage.getItem(SAVE_KEY + "_" + mode); }
 function showModeSelect(){
-    if(!validateAndStoreEmailForModeSelect()) return;
 
     setGameControlsVisible(false);
 
@@ -4779,23 +4766,6 @@ showContinueButtonIfSaved();
 // - progression bugs
 // =============================================
 function startGame(shouldResume = false) {
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-
-    if (!inputEmail) {
-        alert("An email is required to enter the Protocol.");
-        return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(inputEmail)) {
-        alert("Enter a valid email address.");
-        return;
-    }
-
-    studentEmail = inputEmail;
-    username = generatePseudonymFromEmail(studentEmail);
-
     const hasSavedRun = shouldResume && modeAllowsSave() ? loadSavedGame() : false;
 
     if(hasSavedRun && gameMode === "standard"){
@@ -4804,10 +4774,10 @@ function startGame(shouldResume = false) {
 
     if(!hasSavedRun){
         bossCheckpoint = 1;
-        runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        runID = Date.now().toString() + "-" + Math.random().toString(36).slice(2, 8);
+        username = generatePseudonymFromSeed(runID);
     }
-
-    localStorage.setItem("gauntletEmail", studentEmail);
+    if(!username) username = generatePseudonymFromSeed(runID || String(Date.now()));
     localStorage.setItem("gauntletUser", username);
     localStorage.setItem("gauntletRunID", runID);
     localStorage.setItem("stabilizationProtocolCurrentMode", gameMode);
@@ -4822,7 +4792,6 @@ function startGame(shouldResume = false) {
         game: "The Stabilization Protocol",
         event: hasSavedRun ? "resume" : "start",
         user: username,
-        email: studentEmail,
         mode: getModeDisplayName()
     });
 
@@ -4905,6 +4874,7 @@ function startGame(shouldResume = false) {
 // Start game loop: music + timer + first question
     initializeRunForMode(gameMode);
     safePlay(bgMusic);
+    finalElapsedTimeMs = null;
     startTime = Date.now(); 
     loadQuestion();
 }
@@ -5141,10 +5111,12 @@ function endTimedModeRun(){
 
     stopTimedModeClock();
     gameMode = "timed-complete";
+    const totalTimeMs = freezeCompletionTime();
 
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const verificationCode = generateCode(username + "|TIMED", accuracy, maxStreak, totalTimeMs);
 
     const bestRoom = Number(localStorage.getItem("stabilizationProtocolTimedBestRoom") || 0);
     if(timedHighestRoom > bestRoom){
@@ -5164,7 +5136,6 @@ function endTimedModeRun(){
         game: "The Stabilization Protocol",
         event: "timed_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -5174,9 +5145,10 @@ function endTimedModeRun(){
         responseTime: 0,
         attempt: totalAttempts,
         streak: streak,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: "timed_complete",
-        totalTime: timedModeDurationMs,
+        totalTime: totalTimeMs,
+        verificationCode,
         accuracy: accuracy / 100,
         maxStreak: maxStreak,
         totalAttempts: totalAttempts
@@ -5196,11 +5168,14 @@ function endTimedModeRun(){
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
             Best Streak: ${maxStreak}<br>
-            Setbacks Taken: ${timedSetbacks}
+            Setbacks Taken: ${timedSetbacks}<br>
+            Total Time: ${formatTime(totalTimeMs)}<br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
@@ -5222,18 +5197,6 @@ function getDifficultyForMode(){if(gameMode==="exam"||gameMode==="timed")return(
 // Allows pressing Enter to start the game
 // Improves usability, does not affect logic
 // =============================================
-document.getElementById("emailInput").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-
-        if(hasSavedGame("standard")){
-            continueSavedRun();
-        } else {
-            showModeSelect();
-        }
-    }
-});
-
 // =============================================
 // AREA NAMING SYSTEM — SAFE TO CUSTOMIZE (WITH RULES)
 // =============================================
@@ -7030,19 +6993,23 @@ if(rapidGuess.triggered && !rapidGuessLocked){
     sendGameData({
         runID: runID,
         game: "The Stabilization Protocol",
-        event: "rapid_guessing",
+        event: "question",
         user: username || "anonymous",
-        email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
-        correct: isCorrect ? 1 : 0,
+        selectedIndex: selectedIndex,
+        selectedAnswer: currentQuestion.options[selectedIndex] || "",
+        correctIndex: currentQuestion.a,
+        answerKeyMatch: isCorrect ? 1 : 0,
+        correct: 0,
+        rapidGuessing: 1,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
         responseTime: responseTime,
         attempt: totalAttempts ?? 0,
         streak: streak ?? 0,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: adaptiveMode,
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore
@@ -7096,17 +7063,21 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 		game: "The Stabilization Protocol",
         event: "question",
         user: username || "anonymous",
-		    email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
+        selectedIndex: selectedIndex,
+        selectedAnswer: currentQuestion.options[selectedIndex] || "",
+        correctIndex: currentQuestion.a,
+        answerKeyMatch: isCorrect ? 1 : 0,
         correct: isCorrect ? 1 : 0,
+        rapidGuessing: 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
         responseTime: responseTime,
 	      attempt: totalAttempts ?? 0,
 		    streak: streak ?? 0,
-		    elapsedTime: startTime ? (Date.now() - startTime) : 0,
+		    elapsedTime: getElapsedTimeMs(),
         adaptiveMode: adaptiveMode,
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore
@@ -7256,7 +7227,6 @@ if(remediationState.active){
 			game: "The Stabilization Protocol",
             event: "boss_defeated",
             user: username,
-			email: studentEmail,
             room: room
          });
            
@@ -7742,7 +7712,7 @@ function handleLegendaryVictory(){
         sfxVictory.play();
     }
 
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
     const verificationCode = generateCode(username + "|LEGENDARY", accuracy, maxStreak, totalTimeMs);
@@ -7752,7 +7722,6 @@ function handleLegendaryVictory(){
         game: "The Stabilization Protocol",
         event: "legendary_complete",
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -7795,6 +7764,7 @@ function handleLegendaryVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
     `;
@@ -7804,10 +7774,12 @@ function handleLegendaryVictory(){
 
 function handlePracticeModeComplete(){
     stopTimedModeClock();
+    const totalTimeMs = freezeCompletionTime();
 
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const verificationCode = generateCode(username + "|" + getModeDisplayName(), accuracy, maxStreak, totalTimeMs);
 
     if(gameMode === "exam"){
         markExamDrillCompleted();
@@ -7831,7 +7803,6 @@ function handlePracticeModeComplete(){
         game: "The Stabilization Protocol",
         event: `${gameMode}_complete`,
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -7841,9 +7812,10 @@ function handlePracticeModeComplete(){
         responseTime: 0,
         attempt: totalAttempts,
         streak,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: `${gameMode}_complete`,
-        totalTime: startTime ? (Date.now() - startTime) : 0,
+        totalTime: totalTimeMs,
+        verificationCode,
         accuracy: accuracy / 100,
         maxStreak,
         totalAttempts
@@ -7859,11 +7831,14 @@ function handlePracticeModeComplete(){
             You reached the end of this practice path.<br><br>
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
-            Best Streak: ${maxStreak}
+            Best Streak: ${maxStreak}<br>
+            Total Time: ${formatTime(totalTimeMs)}<br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
     `;
@@ -7957,11 +7932,12 @@ function generateCode(name, acc, streak, total){
 function handleScoreAttackVictory(){
     stopTimedModeClock();
 
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
+    const verificationCode = generateCode(username + "|SCORE", accuracy, maxStreak, totalTimeMs);
 
     storeScoreAttackFinalStats(accuracy, totalTimeMs);
 
@@ -7970,7 +7946,6 @@ function handleScoreAttackVictory(){
         game: "The Stabilization Protocol",
         event: "score_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -7986,6 +7961,7 @@ function handleScoreAttackVictory(){
         accuracy: accuracy / 100,
         maxStreak: maxStreak,
         totalAttempts: totalAttempts,
+        verificationCode,
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore,
         scoreEvents: JSON.stringify(scoreAttackEvents)
@@ -8015,11 +7991,13 @@ function handleScoreAttackVictory(){
             Accuracy: ${accuracy}%<br>
             Total Attempts: ${totalAttempts}<br>
             Best Streak: ${maxStreak}<br>
-            Total Time: ${timeString}
+            Total Time: ${timeString}<br>
+            Verification Code: <strong>${verificationCode}</strong>
         </div>
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
         <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Protocol Run</button>
@@ -8065,7 +8043,7 @@ function handleVictory() {
         sfxVictory.play();
     }
 
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
     const verificationCode = generateCode(username, accuracy, maxStreak, totalTimeMs);
@@ -8075,7 +8053,6 @@ function handleVictory() {
         game: "The Stabilization Protocol",
         event: "complete",
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -8274,7 +8251,7 @@ function formatTime(ms) {
 // Removing those will break this function.
 // =============================================     
 function copyResults() {
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs = getElapsedTimeMs();
     const timeString = formatTime(totalTimeMs);
     const code = document.getElementById("vCode").innerText;
     const accuracy = Math.round((correctAnswers / totalAttempts) * 100);
@@ -8302,48 +8279,23 @@ function copyResults() {
     });
 }
 
-function sendGameData(data) {
-  const payload = {
-    timestamp: new Date().toISOString(),
-    runID: data.runID || localStorage.getItem("gauntletRunID") || "",
-    token: data.token || "",
-    version: "StabilizationProtocol-ms-telemetry-v3.5",
-    userAgent: navigator.userAgent || "",
-    game: data.game || "The Stabilization Protocol",
-	mode: data.mode || gameMode || "standard",
-    event: data.event || "",
-    user: data.user || username || "anonymous",
-	email: studentEmail || "",  
-    room: Number(data.room ?? 0),
-    questionId: Number(data.questionId ?? data.question ?? 0),
-    correct: Number(data.correct ?? 0),
-    tag: data.tag || "",
-    type: data.type || "",
-    objective: data.objective || "",
-    responseTime: Number(data.responseTime ?? data.responseTimeMs ?? 0),
-    attempt: Number(data.attempt ?? 0),
-    streak: Number(data.streak ?? 0),
-    elapsedTime: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
-    adaptiveMode: data.adaptiveMode || adaptiveMode || "",
-    totalTime: Number(data.totalTime ?? data.totalTimeMs ?? 0),
-    accuracy: Number(data.accuracy ?? 0),
-    maxStreak: Number(data.maxStreak ?? 0),
-    totalAttempts: Number(data.totalAttempts ?? data.attempts ?? 0),
-    score: Number(data.score ?? scoreAttackScore ?? 0),
-    bestScore: Number(data.bestScore ?? scoreAttackBestScore ?? 0),
-    scoreEvents: data.scoreEvents || "",
-    verificationCode: data.verificationCode || data.code || ""
-  };
 
-  fetch("https://default8de80de86d8a47cbb5bc7fb9b5bf1c.64.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/239b526e4b9f4c1997a009d53a32267a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQhDuP6P3K8mxdCKyBaMw6S0IPd8rBn8BUAEi_CtlxQ", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  }).catch(err => console.log("Telemetry failed:", err));
-}
-   
+const TELEMETRY_PREFIX = "stabilizationProtocolTelemetry_";
+const TELEMETRY_VERSION = "Protocol-local-telemetry-v3";
+const GAME_VERSION = "Stabilization-Protocol-2026.07.24.1";
+const TELEMETRY_MAX_ROWS = 1500;
+const TELEMETRY_COLUMNS = ["eventID","timestamp","telemetryVersion","gameVersion","runID","game","mode","event","room","questionID","questionVersion","difficulty","selectedIndex","selectedAnswer","correctIndex","answerKeyMatch","correct","rapidGuessing","tag","type","objective","responseTimeMs","attempt","streak","elapsedTimeMs","adaptiveMode","remediationStage","priorExposureCount","firstExposure","score","bestScore","totalTimeMs","accuracy","maxStreak","totalAttempts","verificationCode"];
+function getTelemetryStorageKey(id){return TELEMETRY_PREFIX+(id||runID||"unassigned");}
+function getTelemetryRows(id){try{const rows=JSON.parse(localStorage.getItem(getTelemetryStorageKey(id))||"[]");return Array.isArray(rows)?rows:[];}catch(error){console.warn("Local telemetry could not be read:",error);return [];}}
+function telemetryNumber(value,fallback){const number=Number(value);return Number.isFinite(number)?number:(fallback||0);}
+function telemetryAnswer(data){if(typeof data.selectedAnswer==="string")return data.selectedAnswer;const index=telemetryNumber(data.selectedIndex,-1);const question=data.question||currentQuestion;return question&&Array.isArray(question.options)&&index>=0?String(question.options[index]||""):"";}
+function sendGameData(data){
+data=data||{};const eventName=String(data.event||"");const response=eventName==="question";const eventRunID=data.runID||runID||localStorage.getItem("gauntletRunID")||"";
+const row={eventID:data.eventID||(Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)),timestamp:new Date().toISOString(),telemetryVersion:TELEMETRY_VERSION,gameVersion:GAME_VERSION,runID:eventRunID,game:data.game||"The Stabilization Protocol",mode:data.mode||gameMode||"standard",event:eventName,room:telemetryNumber(data.room,0),questionID:telemetryNumber(data.questionId!==undefined?data.questionId:data.questionID,0),questionVersion:data.questionVersion||"",difficulty:data.difficulty||"",selectedIndex:response?telemetryNumber(data.selectedIndex,-1):-1,selectedAnswer:response?telemetryAnswer(data):"",correctIndex:response?telemetryNumber(data.correctIndex,-1):-1,answerKeyMatch:response?telemetryNumber(data.answerKeyMatch,telemetryNumber(data.correct,0)):0,correct:response?telemetryNumber(data.correct,0):0,rapidGuessing:response?telemetryNumber(data.rapidGuessing,0):0,tag:data.tag||"",type:data.type||"",objective:data.objective||"",responseTimeMs:telemetryNumber(data.responseTime!==undefined?data.responseTime:data.responseTimeMs,0),attempt:telemetryNumber(data.attempt,totalAttempts||0),streak:telemetryNumber(data.streak,streak||0),elapsedTimeMs:telemetryNumber(data.elapsedTime!==undefined?data.elapsedTime:data.elapsedTimeMs,getElapsedTimeMs()),adaptiveMode:data.adaptiveMode||adaptiveMode||"",remediationStage:data.remediationStage||(remediationState&&remediationState.stage)||"",priorExposureCount:telemetryNumber(data.priorExposureCount,0),firstExposure:telemetryNumber(data.firstExposure,0),score:telemetryNumber(data.score,scoreAttackScore||0),bestScore:telemetryNumber(data.bestScore,scoreAttackBestScore||0),totalTimeMs:telemetryNumber(data.totalTime!==undefined?data.totalTime:data.totalTimeMs,finalElapsedTimeMs||0),accuracy:telemetryNumber(data.accuracy,totalAttempts?correctAnswers/totalAttempts:0),maxStreak:telemetryNumber(data.maxStreak,maxStreak||0),totalAttempts:telemetryNumber(data.totalAttempts,totalAttempts||0),verificationCode:data.verificationCode||data.code||""};
+const rows=getTelemetryRows(eventRunID);rows.push(row);localStorage.setItem(getTelemetryStorageKey(eventRunID),JSON.stringify(rows.slice(-TELEMETRY_MAX_ROWS)));localStorage.setItem("stabilizationProtocolLatestTelemetryRunID",eventRunID);return row;}
+function escapeCsvValue(value){const text=String(value===undefined||value===null?"":value);return /[",\r\n]/.test(text)?String.fromCharCode(34)+text.replace(/"/g,String.fromCharCode(34)+String.fromCharCode(34))+String.fromCharCode(34):text;}
+function downloadTelemetryCsv(){const id=runID||localStorage.getItem("stabilizationProtocolLatestTelemetryRunID")||"";const rows=getTelemetryRows(id);const csv=[TELEMETRY_COLUMNS.join(","),...rows.map(row=>TELEMETRY_COLUMNS.map(column=>escapeCsvValue(row[column])).join(","))].join("\r\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="stabilization-protocol-"+(id||"game-data")+".csv";document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(link.href);},0);}
+
 // =====================================================
 // IF SOMETHING BREAKS:
 //
@@ -8395,6 +8347,8 @@ const STABILIZATION_PROTOCOL_OBJECTIVE_LABELS = {
     "LO36.4": "LO 36.4 — Supply shocks and inflation-output tradeoffs",
     "LO36.5": "LO 36.5 — Disinflation and sacrifice ratio"
 };
+
+Object.keys((window.STABILIZATION_PROTOCOL_INSTRUCTIONAL_RESOURCES || { objectives: {} }).objectives).forEach(function(key){ const objective = window.STABILIZATION_PROTOCOL_INSTRUCTIONAL_RESOURCES.objectives[key]; STABILIZATION_PROTOCOL_OBJECTIVE_LABELS[key] = "LO " + key.slice(2) + " — " + objective.title; });
 
 function escapeHTML(value){
     return String(value ?? "")
@@ -8630,8 +8584,26 @@ function getMasteryReportModeName(){
     return getModeDisplayName();
 }
 
+
+function getInstructionalResourceCatalog(){return window.STABILIZATION_PROTOCOL_INSTRUCTIONAL_RESOURCES||window.INSTRUCTIONAL_RESOURCES||null;}
+function normalizeLearningObjective(value){const match=String(value||"").match(/LO\s?(\d+)\.(\d+)/i);return match?"LO"+match[1]+"."+match[2]:"";}
+function getRecommendedResources(report){
+const catalog=getInstructionalResourceCatalog();if(!catalog)return [];
+const byId={};Object.values(catalog.chapters||{}).forEach(chapter=>(chapter.resources||[]).forEach(resource=>{byId[resource.id]=resource;}));
+const candidates=(report.weakestObjectives&&report.weakestObjectives.length?report.weakestObjectives:report.strongest||[]);const selected=[];
+function add(resource){if(resource&&!selected.some(item=>item.id===resource.id)&&selected.length<3)selected.push(resource);}
+candidates.forEach(entry=>{if(selected.length>=3)return;const objective=(catalog.objectives||{})[normalizeLearningObjective(entry.key)];if(!objective)return;(objective.resourceIds||[]).forEach(id=>add(byId[id]));if(selected.length<3&&catalog.settings&&catalog.settings.enableChapterFallback){const chapter=(catalog.chapters||{})[String(objective.chapter)];((chapter&&chapter.fallbackResourceIds)||[]).forEach(id=>add(byId[id]));}});
+if(!selected.length){const chapter=Object.values(catalog.chapters||{})[0];((chapter&&chapter.fallbackResourceIds)||[]).forEach(id=>add(byId[id]));}
+return selected;
+}
+function renderInstructionalResourceSection(report){
+const recommendations=report.recommendations||[];
+if(!recommendations.length)return '<div class="mastery-section"><h3>Recommended Review</h3><p class="mastery-empty">No local review resource is available for this report yet.</p></div>';
+return '<div class="mastery-section recommendation-section"><h3>Recommended Review</h3><div class="resource-card-grid">'+recommendations.map(resource=>'<a class="resource-card" href="'+escapeHTML(resource.url)+'" target="'+(resource.external?"_blank":"_self")+'" rel="noopener noreferrer"><span class="resource-type">'+escapeHTML(resource.type.replace(/-/g," "))+'</span><span class="resource-title">'+escapeHTML(resource.title)+'</span><span class="resource-description">'+escapeHTML(resource.description)+'</span><span class="resource-action">'+escapeHTML(resource.actionLabel||"Open Resource")+' →</span></a>').join("")+'</div></div>';
+}
+
 function getMasteryReportData(){
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs = getElapsedTimeMs();
     const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
     const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
     const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
@@ -8717,7 +8689,8 @@ function getMasteryReportData(){
         noMajorWeakness,
         behavior,
         verdict,
-        nextSteps
+        nextSteps,
+        recommendations: getRecommendedResources({ weakestObjectives, strongest })
     };
 }
 
@@ -8765,8 +8738,8 @@ function showMasteryReportScreen(){
             })}
 
             ${renderMasteryDiagnosticSection({
-                weaknessTitle: "Weakest Question Forms",
-                signalTitle: "Question Form Signals",
+                weaknessTitle: "Weakest Question Types",
+                signalTitle: "Question Type Signals",
                 entries: report.weakestTypes,
                 hasWeakness: report.hasTypeWeakness,
                 weaknessEmptyText: "No question-type weakness was detected.",
@@ -8812,7 +8785,10 @@ function showMasteryReportScreen(){
                 ${report.nextSteps.map(step => `<div class="mastery-row"><span class="mastery-row-name">${escapeHTML(step)}</span></div>`).join("")}
             </div>
 
+            ${renderInstructionalResourceSection(report)}
+
             <div class="mastery-actions">
+                <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
                 <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
                 ${report.noMajorWeakness && gameMode !== "legendary" ? `<button class="continue-btn" onclick="startSelectedMode('legendary')">Enter Legendary Mode</button>` : ""}
                 <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
@@ -8852,14 +8828,17 @@ function copyMasteryReport(){
         report.hasObjectiveWeakness ? "Weakest Learning Objectives:" : "Objective Signals:",
         ...(report.hasObjectiveWeakness && report.weakestObjectives.length ? report.weakestObjectives.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major objective weakness detected. Try Legendary Mode next."]),
         "",
-        report.hasTypeWeakness ? "Weakest Question Forms:" : "Question Form Signals:",
+        report.hasTypeWeakness ? "Weakest Question Types:" : "Question Type Signals:",
         ...(report.hasTypeWeakness && report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major question-form weakness detected."]),
         "",
         report.hasSkillWeakness ? "Weakest Skills:" : "Skill Signals:",
         ...(report.hasSkillWeakness && report.weakestSkills.length ? report.weakestSkills.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major skill weakness detected."]),
         "",
         "Next Moves:",
-        ...report.nextSteps.map(step => `- ${step}`)
+        ...report.nextSteps.map(step => "- " + step),
+        "",
+        "Recommended Review:",
+        ...(report.recommendations.length ? report.recommendations.map(resource => "- " + resource.title + " | " + resource.type + " | " + resource.url) : ["- No local review resource available."])
     ].filter(line => line !== null);
 
     const text = lines.join("\n");
