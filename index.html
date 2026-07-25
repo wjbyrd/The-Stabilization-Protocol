@@ -2611,8 +2611,8 @@ body.game-active #soundToggle {
 
 .resource-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}.resource-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid rgba(251,191,36,.42);border-radius:11px;background:radial-gradient(circle at top,rgba(245,158,11,.16),rgba(30,18,8,.9) 62%,rgba(2,6,23,.98));box-shadow:0 0 16px rgba(245,158,11,.14),inset 0 0 18px rgba(0,0,0,.48);color:#fff8e7;text-decoration:none;}.resource-card:hover,.resource-card:focus{border-color:#f7d982;box-shadow:0 0 22px rgba(247,217,130,.32),inset 0 0 18px rgba(0,0,0,.48);}.resource-type{color:#c7ecff;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;overflow-wrap:normal;}.resource-title{color:#f7d982;font-weight:900;line-height:1.25;}.resource-description{color:rgba(238,248,255,.84);font-size:12px;line-height:1.4;}.resource-action{margin-top:auto;color:#fff8e7;font-size:12px;font-weight:800;}@media(max-width:768px){#gameShell{border-color:rgba(251,191,36,.30);box-shadow:0 0 24px rgba(0,0,0,.90),0 0 38px rgba(245,158,11,.14),inset 0 0 30px rgba(0,0,0,.78);}#gameBox{padding:10px;background:radial-gradient(circle at center,rgba(245,158,11,.12) 0%,rgba(15,23,42,.60) 46%,rgba(30,18,8,.94) 74%,rgba(2,6,23,.99) 100%);border-color:rgba(251,191,36,.36);box-shadow:0 0 22px rgba(245,158,11,.18),0 0 58px rgba(56,189,248,.10),0 0 72px rgba(15,23,42,.72),inset 0 0 42px rgba(0,0,0,.78);}.mastery-report-screen{padding:12px;color:#fff8e7;}.mastery-stat-card,.mastery-section{background:radial-gradient(circle at top,rgba(245,158,11,.14),rgba(30,18,8,.84) 45%,rgba(2,6,23,.96));border-color:rgba(247,217,130,.34);}.resource-card-grid{grid-template-columns:1fr;}.resource-card{padding:12px;}}
 </style>
-<script src="instructional_resources.js"></script>
-<script src="stabilization_protocol_questions_student.js"></script>
+<script src="instructional_resources.js?v=20260725_1" charset="UTF-8"></script>
+<script src="stabilization_protocol_questions_student.js?v=20260725_1" charset="UTF-8"></script>
 </head>
 
 <!-- =========================================
@@ -5339,67 +5339,27 @@ function wizardSpeak(text){
   
 
 
-const objectiveLabels = {
-  "30.1": "Money Functions and Forms",
-  "30.2": "Federal Reserve Structure and Roles",
-  "30.3": "Banks, Reserves, and Money Creation",
-  "30.4": "Federal Reserve Tools and the Money Supply",
-  "30.5": "Limits of Monetary Control",
-  "31.1": "Quantity Theory, Money Demand, and Inflation",
-  "31.2": "Nominal vs. Real Variables and Monetary Neutrality",
-  "31.3": "Fisher Effect",
-  "31.4": "Inflation Costs and Inflation Tax",
-  "31.5": "Inflation and Deflation Policy Implications",
-  "34.1": "Aggregate Demand: Slope and Shifts",
-  "34.2": "Aggregate Supply: SRAS, LRAS, and Productive Capacity",
-  "34.3": "Sticky Wages, Sticky Prices, and Misperceptions",
-  "34.4": "Economic Shocks in the AD-AS Model",
-  "34.5": "Long-Run Equilibrium and Adjustment",
-  "35.1": "Liquidity Preference and Money-Market Adjustment",
-  "35.2": "Monetary Policy and Aggregate Demand",
-  "35.3": "Fiscal Policy and Aggregate Demand",
-  "35.4": "Multiplier Effects and Crowding Out",
-  "35.5": "Stabilization Policy Choices and Policy Lags",
-  "36.1": "Short-Run Inflation-Unemployment Tradeoff",
-  "36.2": "Short-Run and Long-Run Phillips Curves",
-  "36.3": "Expectations and Phillips-Curve Shifts",
-  "36.4": "Policy, Inflation, Unemployment, and Transitions",
-  "36.5": "Disinflation and the Sacrifice Ratio",
-  "integrated_final_exam_review": "Integrated Final Exam Review",
-  "integrated_stabilization_protocol_review": "Integrated Stabilization Protocol Review"
-};
-
-
-
-// Direct repair coverage for every primary skill used in the question banks.
-// These entries keep a repeated miss tied to its specific misconception before
-// the bridge-and-retest stages begin.
-const stabilizationDirectSkillRepairs = {
-automatic_stabilizers:[{"id":5064,"q":"Repair check: Which policy acts automatically to cushion a recession without a new vote by Congress?","options":["Unemployment benefits that rise as workers lose jobs","A one-time discretionary tax bill","A Federal Reserve bond sale","A price ceiling"],"a":0,"tag":"automatic_stabilizers","type":"repair","objective":"LO35.5","difficulty":"microRepair","primarySkill":"automatic_stabilizers","repairSkill":"automatic_stabilizers","feedback":"Automatic stabilizers change with economic conditions; unemployment benefits rise as unemployment rises."}],
-classify_demand_shock:[{"id":5065,"q":"Repair check: A sharp fall in consumer confidence is primarily which kind of shock?","options":["A negative aggregate-demand shock","A positive supply shock","A change in LRAS","A movement along AD"],"a":0,"tag":"demand_shocks","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"classify_demand_shock","repairSkill":"classify_demand_shock","feedback":"Lower consumer confidence reduces consumption and shifts aggregate demand left."}],
-classify_supply_shock:[{"id":5066,"q":"Repair check: A sudden rise in oil prices is primarily which kind of shock?","options":["A negative short-run aggregate-supply shock","A positive aggregate-demand shock","A change in the money multiplier","A movement along SRAS"],"a":0,"tag":"supply_shocks","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"classify_supply_shock","repairSkill":"classify_supply_shock","feedback":"Higher input costs shift SRAS left, making this a negative supply shock."}],
-commodity_vs_fiat_money:[{"id":5067,"q":"Repair check: What makes fiat money valuable?","options":["Government acceptance and public trust, not intrinsic commodity value","Its gold content alone","A fixed reserve requirement","Its use only in foreign trade"],"a":0,"tag":"forms_of_money","type":"repair","objective":"LO30.1","difficulty":"microRepair","primarySkill":"commodity_vs_fiat_money","repairSkill":"commodity_vs_fiat_money","feedback":"Fiat money has value because it is accepted in exchange, not because the paper itself is valuable."}],
-connect_output_unemployment:[{"id":5068,"q":"Repair check: When real output is below natural output, unemployment is usually:","options":["Above its natural rate","Below its natural rate","Always zero","Unrelated to output"],"a":0,"tag":"economic_fluctuations","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"connect_output_unemployment","repairSkill":"connect_output_unemployment","feedback":"A recessionary gap means firms need fewer workers, so unemployment tends to exceed the natural rate."}],
-define_stagflation:[{"id":5069,"q":"Repair check: Stagflation combines:","options":["High inflation and high unemployment","Low inflation and low unemployment","Rapid growth and falling prices","Balanced budgets and low interest rates"],"a":0,"tag":"supply_shocks","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"define_stagflation","repairSkill":"define_stagflation","feedback":"Stagflation is the difficult combination of rising prices and weak employment/output conditions."}],
-deposit_creation:[{"id":5070,"q":"Repair check: When a bank makes a loan from excess reserves, what can happen next?","options":["The loan can become a deposit elsewhere and support further lending","The money supply must shrink immediately","Required reserves disappear","The loan stops being an asset"],"a":0,"tag":"money_creation","type":"repair","objective":"LO30.3","difficulty":"microRepair","primarySkill":"deposit_creation","repairSkill":"deposit_creation","feedback":"Loans can become deposits at other banks, allowing the deposit-creation process to continue."}],
-fiscal_policy_magnitude:[{"id":5071,"q":"Repair check: Why might a tax cut have a smaller immediate effect than an equal increase in government purchases?","options":["Households may save part of the tax cut","Tax cuts never affect AD","Government purchases are not part of GDP","Taxes shift SRAS directly"],"a":0,"tag":"fiscal_policy","type":"repair","objective":"LO35.4","difficulty":"microRepair","primarySkill":"fiscal_policy_magnitude","repairSkill":"fiscal_policy_magnitude","feedback":"Some of a tax cut is saved, so its initial spending effect can be smaller than direct government purchases."}],
-identify_natural_output:[{"id":5076,"q":"Repair check: On an AD-AS graph, natural output is the output level where:","options":["Real GDP equals potential output","Inflation is zero","AD is vertical","Unemployment is zero"],"a":0,"tag":"lras","type":"repair","objective":"LO34.5","difficulty":"microRepair","primarySkill":"identify_natural_output","repairSkill":"identify_natural_output","feedback":"Natural output is potential output, the economy's sustainable long-run production level."}],
-identify_natural_unemployment:[{"id":5077,"q":"Repair check: The natural rate of unemployment includes:","options":["Frictional and structural unemployment","Only cyclical unemployment","No unemployment at all","Only discouraged workers"],"a":0,"tag":"lrpc","type":"repair","objective":"LO36.2","difficulty":"microRepair","primarySkill":"identify_natural_unemployment","repairSkill":"identify_natural_unemployment","feedback":"The natural rate remains even at potential output because frictional and structural unemployment persist."}],
-inflation_redistribution:[{"id":5079,"q":"Repair check: Unexpected inflation redistributes wealth toward borrowers when:","options":["Loans have fixed nominal payments","All loans adjust instantly with inflation","Interest rates are always zero","Prices never change"],"a":0,"tag":"inflation_redistribution","type":"repair","objective":"LO31.4","difficulty":"microRepair","primarySkill":"inflation_redistribution","repairSkill":"inflation_redistribution","feedback":"Unexpected inflation lowers the real value of fixed nominal repayments, helping borrowers and hurting lenders."}],
-interest_on_reserves_policy:[{"id":5080,"q":"Repair check: Raising the interest rate paid on bank reserves tends to:","options":["Encourage banks to hold reserves rather than lend","Force banks to lend all reserves","Raise the money multiplier automatically","Shift SRAS right"],"a":0,"tag":"interest_on_reserves","type":"repair","objective":"LO30.4","difficulty":"microRepair","primarySkill":"interest_on_reserves_policy","repairSkill":"interest_on_reserves_policy","feedback":"A higher return on reserves increases the incentive to hold reserves, which can restrain lending."}],
-monetary_policy_ad_shift:[{"id":5082,"q":"Repair check: If the Fed decreases the money supply, aggregate demand usually:","options":["Shifts left as interest rates rise and spending falls","Shifts right as interest rates fall","Does not change under any circumstance","Becomes vertical"],"a":0,"tag":"monetary_policy","type":"repair","objective":"LO35.2","difficulty":"microRepair","primarySkill":"monetary_policy_ad_shift","repairSkill":"monetary_policy_ad_shift","feedback":"Contractionary monetary policy tends to raise interest rates and reduce interest-sensitive spending, shifting AD left."}],
-nominal_real_interest_rate:[{"id":5083,"q":"Repair check: A nominal interest rate is 8 percent and inflation is 3 percent. The approximate real interest rate is:","options":["5 percent","11 percent","8 percent","-5 percent"],"a":0,"tag":"fisher_effect","type":"repair","objective":"LO31.3","difficulty":"microRepair","primarySkill":"nominal_real_interest_rate","repairSkill":"nominal_real_interest_rate","feedback":"Approximate real interest equals nominal interest minus inflation: 8% − 3% = 5%."}],
-read_ad_as_axes:[{"id":5085,"q":"Repair check: The vertical axis on a standard AD-AS graph measures:","options":["The price level","Real GDP","The unemployment rate","The nominal interest rate"],"a":0,"tag":"ad_as_basics","type":"repair","objective":"LO34.1","difficulty":"microRepair","primarySkill":"read_ad_as_axes","repairSkill":"read_ad_as_axes","feedback":"AD-AS graphs place the price level on the vertical axis and real output on the horizontal axis."}],
-read_ad_as_equilibrium:[{"id":5086,"q":"Repair check: In an AD-AS graph, short-run equilibrium occurs where:","options":["Aggregate demand intersects short-run aggregate supply","AD intersects LRAS only","The price level is zero","Unemployment is zero"],"a":0,"tag":"ad_as_graph_interpretation","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"read_ad_as_equilibrium","repairSkill":"read_ad_as_equilibrium","feedback":"The intersection of AD and SRAS determines the short-run equilibrium price level and real output."}],
-read_ad_shift:[{"id":5087,"q":"Repair check: A rightward shift of aggregate demand means:","options":["Planned spending is higher at each price level","The price level has moved along AD","Short-run aggregate supply shifted left","Potential output fell"],"a":0,"tag":"aggregate_demand","type":"repair","objective":"LO34.1","difficulty":"microRepair","primarySkill":"read_ad_shift","repairSkill":"read_ad_shift","feedback":"A shift in AD changes total planned spending at every price level."}],
-read_money_market_equilibrium:[{"id":5088,"q":"Repair check: In the money market, the equilibrium interest rate occurs where:","options":["Money demand equals money supply","AD equals SRAS","Saving equals investment only","Government spending equals taxes"],"a":0,"tag":"liquidity_preference","type":"repair","objective":"LO35.1","difficulty":"microRepair","primarySkill":"read_money_market_equilibrium","repairSkill":"read_money_market_equilibrium","feedback":"The money-market interest rate adjusts until the quantity of money demanded equals the quantity supplied."}],
-read_money_market_shift:[{"id":5089,"q":"Repair check: If the money supply shifts right while money demand is unchanged, the equilibrium interest rate tends to:","options":["Fall","Rise","Stay fixed by definition","Equal the inflation rate"],"a":0,"tag":"money_supply_interest_rate","type":"repair","objective":"LO35.2","difficulty":"microRepair","primarySkill":"read_money_market_shift","repairSkill":"read_money_market_shift","feedback":"More money supplied at each interest rate creates downward pressure on the equilibrium interest rate."}],
-read_multiplier_graph:[{"id":5090,"q":"Repair check: The multiplier effect means an initial increase in government spending can:","options":["Create a larger total increase in aggregate demand and output","Affect only the first recipient of spending","Reduce GDP by the same amount","Shift LRAS immediately"],"a":0,"tag":"multiplier_effect","type":"repair","objective":"LO35.4","difficulty":"microRepair","primarySkill":"read_multiplier_graph","repairSkill":"read_multiplier_graph","feedback":"Initial spending becomes income for others, whose further spending magnifies the total effect."}],
-read_pc_points:[{"id":5091,"q":"Repair check: Moving upward and left along a short-run Phillips curve means:","options":["Higher inflation and lower unemployment","Lower inflation and lower unemployment","Higher inflation and higher unemployment","No change in either variable"],"a":0,"tag":"phillips_curve","type":"repair","objective":"LO36.1","difficulty":"microRepair","primarySkill":"read_pc_points","repairSkill":"read_pc_points","feedback":"Along a given short-run Phillips curve, lower unemployment is associated with higher inflation."}],
-read_sras_shift:[{"id":5092,"q":"Repair check: A leftward shift of SRAS means:","options":["Firms supply less output at each price level","Aggregate demand rose","Potential output must have increased","The money supply fell by definition"],"a":0,"tag":"sras_shifts","type":"repair","objective":"LO34.2","difficulty":"microRepair","primarySkill":"read_sras_shift","repairSkill":"read_sras_shift","feedback":"A leftward SRAS shift reflects higher costs or lower productive capacity in the short run."}],
-trace_combined_shocks:[{"id":5093,"q":"Repair check: If AD falls while SRAS also falls, what outcome is certain?","options":["Output falls","The price level falls","Inflation rises","Unemployment falls"],"a":0,"tag":"ad_as_graph_interpretation","type":"repair","objective":"LO34.4","difficulty":"microRepair","primarySkill":"trace_combined_shocks","repairSkill":"trace_combined_shocks","feedback":"Both a leftward AD shift and a leftward SRAS shift reduce equilibrium output; their price-level effects conflict."}]
-};
-Object.assign(microSkillRepairPools, stabilizationDirectSkillRepairs);
+// =============================================
+// QUESTION BANKS — EXTERNALIZED
+// Question pools, objective labels, repair pools, and bridge pools are loaded from:
+// stabilization_protocol_questions_student.js
+// =============================================
+if(typeof questionBanks === "undefined" || !questionBanks){
+    throw new Error("The Stabilization Protocol question bank did not load. Check stabilization_protocol_questions_student.js.");
+}
+if(typeof objectiveLabels === "undefined"){
+    throw new Error("The Stabilization Protocol objective labels did not load. Check stabilization_protocol_questions_student.js.");
+}
+if(typeof microSkillRepairPools === "undefined" || typeof microSkillBridgePools === "undefined"){
+    throw new Error("The Stabilization Protocol repair/bridge pools did not load. Check stabilization_protocol_questions_student.js.");
+}
+console.log("The Stabilization Protocol question bank loaded", {
+    easy: questionBanks.easy?.length || 0,
+    medium: questionBanks.medium?.length || 0,
+    hard: questionBanks.hard?.length || 0,
+    elite: questionBanks.elite?.length || 0,
+    legendary: questionBanks.legendary?.length || 0
+});
 
 
 	 
