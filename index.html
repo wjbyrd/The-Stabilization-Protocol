@@ -2609,7 +2609,7 @@ body.game-active #soundToggle {
     .mastery-row-score{ white-space:normal; }
 }
 
-.resource-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}.resource-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid rgba(251,191,36,.42);border-radius:11px;background:radial-gradient(circle at top,rgba(245,158,11,.16),rgba(30,18,8,.9) 62%,rgba(2,6,23,.98));box-shadow:0 0 16px rgba(245,158,11,.14),inset 0 0 18px rgba(0,0,0,.48);color:#fff8e7;text-decoration:none;}.resource-card:hover,.resource-card:focus{border-color:#f7d982;box-shadow:0 0 22px rgba(247,217,130,.32),inset 0 0 18px rgba(0,0,0,.48);}.resource-type{color:#c7ecff;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;}.resource-title{color:#f7d982;font-weight:900;line-height:1.25;}.resource-description{color:rgba(238,248,255,.84);font-size:12px;line-height:1.4;}.resource-action{margin-top:auto;color:#fff8e7;font-size:12px;font-weight:800;}@media(max-width:768px){#gameShell{border-color:rgba(251,191,36,.30);box-shadow:0 0 24px rgba(0,0,0,.90),0 0 38px rgba(245,158,11,.14),inset 0 0 30px rgba(0,0,0,.78);}#gameBox{padding:10px;background:radial-gradient(circle at center,rgba(245,158,11,.12) 0%,rgba(15,23,42,.60) 46%,rgba(30,18,8,.94) 74%,rgba(2,6,23,.99) 100%);border-color:rgba(251,191,36,.36);box-shadow:0 0 22px rgba(245,158,11,.18),0 0 58px rgba(56,189,248,.10),0 0 72px rgba(15,23,42,.72),inset 0 0 42px rgba(0,0,0,.78);}.mastery-report-screen{padding:12px;color:#fff8e7;}.mastery-stat-card,.mastery-section{background:radial-gradient(circle at top,rgba(245,158,11,.14),rgba(30,18,8,.84) 45%,rgba(2,6,23,.96));border-color:rgba(247,217,130,.34);}.resource-card-grid{grid-template-columns:1fr;}.resource-card{padding:12px;}}
+.resource-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}.resource-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid rgba(251,191,36,.42);border-radius:11px;background:radial-gradient(circle at top,rgba(245,158,11,.16),rgba(30,18,8,.9) 62%,rgba(2,6,23,.98));box-shadow:0 0 16px rgba(245,158,11,.14),inset 0 0 18px rgba(0,0,0,.48);color:#fff8e7;text-decoration:none;}.resource-card:hover,.resource-card:focus{border-color:#f7d982;box-shadow:0 0 22px rgba(247,217,130,.32),inset 0 0 18px rgba(0,0,0,.48);}.resource-type{color:#c7ecff;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;overflow-wrap:normal;}.resource-title{color:#f7d982;font-weight:900;line-height:1.25;}.resource-description{color:rgba(238,248,255,.84);font-size:12px;line-height:1.4;}.resource-action{margin-top:auto;color:#fff8e7;font-size:12px;font-weight:800;}@media(max-width:768px){#gameShell{border-color:rgba(251,191,36,.30);box-shadow:0 0 24px rgba(0,0,0,.90),0 0 38px rgba(245,158,11,.14),inset 0 0 30px rgba(0,0,0,.78);}#gameBox{padding:10px;background:radial-gradient(circle at center,rgba(245,158,11,.12) 0%,rgba(15,23,42,.60) 46%,rgba(30,18,8,.94) 74%,rgba(2,6,23,.99) 100%);border-color:rgba(251,191,36,.36);box-shadow:0 0 22px rgba(245,158,11,.18),0 0 58px rgba(56,189,248,.10),0 0 72px rgba(15,23,42,.72),inset 0 0 42px rgba(0,0,0,.78);}.mastery-report-screen{padding:12px;color:#fff8e7;}.mastery-stat-card,.mastery-section{background:radial-gradient(circle at top,rgba(245,158,11,.14),rgba(30,18,8,.84) 45%,rgba(2,6,23,.96));border-color:rgba(247,217,130,.34);}.resource-card-grid{grid-template-columns:1fr;}.resource-card{padding:12px;}}
 </style>
 <script src="instructional_resources.js"></script>
 <script src="stabilization_protocol_questions_student.js"></script>
@@ -3034,6 +3034,10 @@ const RAPID_GUESS_CONFIG = {
     minAttempts: 5,         // don't trigger until at least 5 recent attempts exist
     avgTimeMs: 3000,        // average under 3 seconds = suspicious
     maxAccuracy: 0.50,      // under 50% accuracy = not engaged
+    burstWindowSize: 4,     // also inspect the most recent local burst
+    burstFastMs: 2500,      // a response under 2.5 seconds counts as fast
+    burstMinFast: 3,        // three fast answers in the burst is suspicious
+    burstMaxAccuracy: 0.25, // no more than one correct answer in four
     lockMs: 4500            // pause length
 };
 let tagHistory = [];
@@ -5113,7 +5117,7 @@ function endTimedModeRun(){
 
     stopTimedModeClock();
     gameMode = "timed-complete";
-    const totalTimeMs = freezeCompletionTime();
+    const totalTimeMs = freezeCompletionTime(timedModeDurationMs);
 
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
@@ -6114,6 +6118,7 @@ if(currentQuestion.image){
 // =============================================     
 function displayQuestion() {
     answerSubmissionPending = false;
+    questionStartTime = Date.now();
     const optionsElement = document.getElementById("answers");
     optionsElement.innerHTML = "";
 
@@ -6164,9 +6169,21 @@ function checkRapidGuessing(isCorrect, responseTime){
 
     const avgTime = recent.reduce((sum, item) => sum + item.responseTime, 0) / recent.length;
     const accuracy = recent.reduce((sum, item) => sum + item.correct, 0) / recent.length;
+    const burst = recent.slice(-RAPID_GUESS_CONFIG.burstWindowSize);
+    const burstFastCount = burst.filter(item =>
+        item.responseTime < RAPID_GUESS_CONFIG.burstFastMs
+    ).length;
+    const burstAccuracy = burst.length
+        ? burst.reduce((sum, item) => sum + item.correct, 0) / burst.length
+        : 1;
+    const rollingPattern = avgTime < RAPID_GUESS_CONFIG.avgTimeMs
+        && accuracy < RAPID_GUESS_CONFIG.maxAccuracy;
+    const burstPattern = burst.length === RAPID_GUESS_CONFIG.burstWindowSize
+        && burstFastCount >= RAPID_GUESS_CONFIG.burstMinFast
+        && burstAccuracy <= RAPID_GUESS_CONFIG.burstMaxAccuracy;
 
     return {
-        triggered: avgTime < RAPID_GUESS_CONFIG.avgTimeMs && accuracy < RAPID_GUESS_CONFIG.maxAccuracy,
+        triggered: rollingPattern || burstPattern,
         avgTime,
         accuracy
     };
@@ -7843,7 +7860,11 @@ function getMasteryReportData(){
     const typeEntries = getTypeMasteryEntries();
     const behavior = getRecentBehaviorSignals();
 
-    const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
+    const strongest = sortStrongest(
+        [...objectiveEntries, ...tagEntries].filter(entry =>
+            entry.attempts >= 2 && entry.accuracy >= 0.70
+        )
+    ).slice(0, 4);
     const weakestObjectives = getMeaningfulWeakEntries(objectiveEntries, 0.85).slice(0, 4);
     const weakestTypes = getMeaningfulWeakEntries(typeEntries, 0.85).slice(0, 3);
     const weakestSkills = getMeaningfulWeakEntries(skillEntries, 0.85).slice(0, 3);
