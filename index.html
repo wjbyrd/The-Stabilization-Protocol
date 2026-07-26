@@ -1,5 +1,5 @@
 <!-- =====================================================
-GAUNTLET ENGINE — MASTER TEMPLATE
+GAUNTLET ENGINE — MASTER TEMPLATE - Patch 07/26
 
 READ BEFORE EDITING:
 
@@ -3076,6 +3076,7 @@ const REALM_STATUS_KEY = "economicRealm_stabilizationProtocol_status";
 const REALM_ROOM_KEY = "economicRealm_stabilizationProtocol_room";
 
 let gameMode = "standard";
+let runSessionId = 0;
 let timedModeDurationMs = 10 * 60 * 1000;
 let timedModeEndTime = null;
 let timedModeTimerInterval = null;
@@ -3236,6 +3237,18 @@ function modeAllowsSave(){
 
 function modeAllowsRealmProgress(){
     return gameMode === "standard";
+}
+function beginRunSession(){
+    runSessionId += 1;
+    return runSessionId;
+}
+
+function scheduleForCurrentRun(callback, delay){
+    const scheduledSessionId = runSessionId;
+    return setTimeout(() => {
+        if(scheduledSessionId !== runSessionId) return;
+        callback();
+    }, delay);
 }
 
 function getSaveKey(){
@@ -4700,8 +4713,12 @@ function returnToTitleScreen(){
 function startSelectedMode(mode){ gameMode = mode || "standard"; localStorage.setItem("stabilizationProtocolCurrentMode", gameMode); const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "none"; if(gameMode === "standard"){ startGame(false); return; } resetRunStateForNewMode(); startGame(false); }
 
 function returnToModeSelectFromRun(){
+    beginRunSession();
     stopTimedModeClock();
     stopAllMusic();
+
+    const hallway = document.getElementById("hallwayTransition");
+    if(hallway) hallway.classList.remove("active");
     updateScoreAttackHud();
 
     setGameControlsVisible(false);
@@ -4867,6 +4884,10 @@ function startGame(shouldResume = false) {
     document.querySelector(".top-panel").style.display = "flex";
     document.getElementById("gameShell").style.display = "flex";
     document.getElementById("gameBox").style.display = "block";
+    const artifactVault = document.getElementById("artifactVault");
+    if(artifactVault){
+        artifactVault.style.display = modeAllowsRealmProgress() ? "block" : "none";
+    }
     document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
 
    // =============================================
@@ -6199,12 +6220,13 @@ function checkRapidGuessing(isCorrect, responseTime){
 // Check for artifact names and CHANGE
      
 async function answer(choice) {
+    const answerSessionId = runSessionId;
     if(answerSubmissionPending || rapidGuessLocked) return;
     answerSubmissionPending = true;
     setAnswerButtonsDisabled(true);
     const responseTime = Date.now() - questionStartTime;
     let isCorrect = false;
-    try { isCorrect = await isQuestionAnswerCorrect(currentQuestion, choice); } catch(error) { console.error("Answer verification failed:", error); answerSubmissionPending = false; setAnswerButtonsDisabled(false); showGameModal({ title: "Answer Check Failed", text: "The Stabilization Protocol could not verify this answer. Reload the game files and try again.", confirmText: "Continue" }); return; }
+    try { isCorrect = await isQuestionAnswerCorrect(currentQuestion, choice); if(answerSessionId !== runSessionId) return; } catch(error) { if(answerSessionId !== runSessionId) return; console.error("Answer verification failed:", error); answerSubmissionPending = false; setAnswerButtonsDisabled(false); showGameModal({ title: "Answer Check Failed", text: "The Stabilization Protocol could not verify this answer. Reload the game files and try again.", confirmText: "Continue" }); return; }
 
     // --- GLOBAL MEMORY DECAY ---
     for(let tag in conceptMemory){
@@ -6331,6 +6353,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     if(modeUsesScoreAttack()){
         setAnswerButtonsDisabled(true);
         await waitForScoreAttackResolve(isCorrect);
+        if(answerSessionId !== runSessionId) return;
     }
 
     // =============================================
@@ -6425,7 +6448,7 @@ if(remediationState.active){
     room = returnRoom;
     saveGameState();
 
-    setTimeout(loadQuestion, TIMING.normal);
+    scheduleForCurrentRun(loadQuestion, TIMING.normal);
     return;
 }
 
@@ -6458,7 +6481,7 @@ if(remediationState.active){
         triggerBossShake();
         
         if (bossHealth > 0) {
-           setTimeout(loadQuestion, TIMING.boss);
+           scheduleForCurrentRun(loadQuestion, TIMING.boss);
            return;
         }
          // Boss defeated
@@ -6762,7 +6785,7 @@ function showHallwayTransition(feedback){
 
     document.getElementById("srAnnouncements").innerText =`Correct. ${feedback}`;
     
-    setTimeout(()=>{
+    scheduleForCurrentRun(()=>{
     overlay.classList.remove("active");
     loadQuestion();
     },3200);
@@ -8115,4 +8138,5 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
+
 
