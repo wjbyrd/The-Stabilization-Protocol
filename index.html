@@ -3238,6 +3238,20 @@ function modeAllowsSave(){
 function modeAllowsRealmProgress(){
     return gameMode === "standard";
 }
+function isRealmMissionComplete(){
+    return localStorage.getItem(REALM_COMPLETE_KEY) === "true";
+}
+function syncRealmAttemptState(){
+    if(!modeAllowsRealmProgress()) return;
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+    if(isRealmMissionComplete()){
+        localStorage.setItem(REALM_STATUS_KEY, "restored");
+        localStorage.setItem(REALM_ROOM_KEY, "30");
+        return;
+    }
+    localStorage.setItem(REALM_STATUS_KEY, "contested");
+    localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
+}
 function beginRunSession(){
     runSessionId += 1;
     return runSessionId;
@@ -3467,9 +3481,7 @@ runID,
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
     if(modeAllowsRealmProgress()){
         localStorage.setItem("stabilizationProtocolRoom", String(room));
-        localStorage.setItem(REALM_STARTED_KEY, "true");
-        localStorage.setItem(REALM_STATUS_KEY, "contested");
-        localStorage.setItem(REALM_ROOM_KEY, String(room));
+        syncRealmAttemptState();
     }
 
     const autosave = document.getElementById("autosave");
@@ -4804,11 +4816,7 @@ function startGame(shouldResume = false) {
     localStorage.setItem("gauntletUser", username);
     localStorage.setItem("gauntletRunID", runID);
     localStorage.setItem("stabilizationProtocolCurrentMode", gameMode);
-    if(modeAllowsRealmProgress()){
-        localStorage.setItem(REALM_STARTED_KEY, "true");
-        localStorage.setItem(REALM_STATUS_KEY, "contested");
-        localStorage.setItem(REALM_ROOM_KEY, String(room || 1));
-    }
+    syncRealmAttemptState();
 
     sendGameData({
         runID: runID,
@@ -4852,15 +4860,14 @@ function startGame(shouldResume = false) {
         if(modeAllowsRealmProgress()){
             localStorage.removeItem("stabilizationProtocolRoom");
 
-            // A new Standard Campaign resets its own artifact route and Realm status.
-            // Practice, Legendary, and Score Attack must not erase Standard progress.
-            localStorage.removeItem("vaultPolicyKey");
-            localStorage.removeItem("vaultRegentsSeal");
-            localStorage.removeItem("vaultChancellorsMandate");
-            localStorage.removeItem(REALM_COMPLETE_KEY);
-            localStorage.setItem(REALM_STATUS_KEY, "contested");
-            localStorage.setItem(REALM_ROOM_KEY, "1");
+            // Only an unfinished Standard Campaign resets attempt-level artifacts.
+            if(!isRealmMissionComplete()){
+                localStorage.removeItem("vaultPolicyKey");
+                localStorage.removeItem("vaultRegentsSeal");
+                localStorage.removeItem("vaultChancellorsMandate");
+            }
         }
+        syncRealmAttemptState();
 
         questionHistory = {
             easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
@@ -5136,6 +5143,7 @@ function updateTimedModeClock(){
 function endTimedModeRun(){
     if(gameMode !== "timed") return;
 
+    beginRunSession();
     stopTimedModeClock();
     gameMode = "timed-complete";
     const totalTimeMs = freezeCompletionTime(timedModeDurationMs);
@@ -6285,7 +6293,7 @@ if(rapidGuess.triggered && !rapidGuessLocked){
     // Same question. No movement. No reward.
     rapidGuessHistory = [];
 
-    setTimeout(() => {
+    scheduleForCurrentRun(() => {
         rapidGuessLocked = false;
         questionStartTime = Date.now();
         displayQuestion();
@@ -8138,5 +8146,4 @@ function copyMasteryReport(){
 </script>
 </body>
 </html>
-
 
