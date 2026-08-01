@@ -2975,6 +2975,56 @@ if (!isFullscreen) {
 // 1. Initial UI State: Hide game until startGame runs
 // =============================================
 document.getElementById("gameBox").style.display = "none";
+
+const STABILIZATION_PROTOCOL_GAMEPLAY_TEMPLATE = document.getElementById("gameBox").innerHTML;
+
+function restoreStabilizationProtocolGameplayShell(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return false;
+
+    const requiredGameplayIds = [
+        "autosave",
+        "areaDisplay",
+        "progressBar",
+        "progressFill",
+        "scoreAttackHud",
+        "scoreAttackDisplay",
+        "scoreAttackBestDisplay",
+        "scoreFloatLayer",
+        "streakDisplay",
+        "timedModeHud",
+        "timerDisplay",
+        "bossMessage",
+        "questionContainer",
+        "questionImageBox",
+        "question",
+        "message",
+        "formulaHint",
+        "answers",
+        "artifactDrop",
+        "artifactImage",
+        "artifactTitle",
+        "artifactText"
+    ];
+
+    const gameplayShellIsIntact = requiredGameplayIds.every(
+        id => document.getElementById(id)
+    );
+
+    if(gameplayShellIsIntact) return false;
+
+    gameBox.innerHTML = STABILIZATION_PROTOCOL_GAMEPLAY_TEMPLATE;
+    gameBox.classList.remove("boss-mode");
+    gameBox.style.removeProperty("--bossColor");
+
+    const gameShell = document.getElementById("gameShell");
+    if(gameShell){
+        gameShell.classList.remove("boss-mode");
+    }
+
+    return true;
+}
+
 document.querySelectorAll(".torch").forEach(t => t.style.display = "none");
 
 // =============================================
@@ -4307,6 +4357,89 @@ function getQuestionsMatchingNeed(pool, objectiveKey, tag, excludeIds = [], skil
     return candidates;
 }
 
+function resolveRecordSkill(record){
+    if(!record) return null;
+
+    const primarySkill = String(record.primarySkill || record.skillId || "").trim();
+    if(primarySkill) return primarySkill;
+
+    const repairSkill = String(record.repairSkill || record.repairSkillId || "").trim();
+    if(repairSkill) return repairSkill;
+
+    const inferredSkill = typeof inferSkill === "function" ? inferSkill(record) : null;
+    return inferredSkill ? String(inferredSkill).trim() : null;
+}
+
+function getStableQuestionIdentity(record){
+    if(record?.questionId) return `questionId:${record.questionId}`;
+    if(record?.id !== undefined && record?.id !== null) return `id:${record.id}`;
+    return `content:${String(record?.q || "")}::${JSON.stringify(record?.options || [])}`;
+}
+
+function deduplicateQuestions(records){
+    const seen = new Set();
+    return (records || []).filter(record => {
+        if(!record) return false;
+        const identity = getStableQuestionIdentity(record);
+        if(seen.has(identity)) return false;
+        seen.add(identity);
+        return true;
+    });
+}
+
+function collectAuxiliaryCandidates(poolEntries, requestedSkill, context = {}){
+    const skill = String(requestedSkill || "").trim();
+    if(!skill) return [];
+
+    const excludedIds = new Set(context.excludeIds || []);
+    const entries = Array.isArray(poolEntries) ? poolEntries : Object.entries(poolEntries || {});
+    const orderedEntries = [
+        ...entries.filter(([poolKey]) => poolKey === skill),
+        ...entries.filter(([poolKey]) => poolKey !== skill)
+    ];
+    const matches = [];
+
+    orderedEntries.forEach(([poolKey, pool]) => {
+        if(!Array.isArray(pool)) return;
+        pool.forEach(record => {
+            if(!record || excludedIds.has(record.id)) return;
+            const declaredSkill = resolveRecordSkill(record);
+            const legacyPoolMatch = !declaredSkill && poolKey === skill;
+            if(declaredSkill === skill || legacyPoolMatch) matches.push(record);
+        });
+    });
+
+    const compatibilityEntries = Array.isArray(context.compatibilityEntries)
+        ? context.compatibilityEntries
+        : [];
+    const compatibilityCandidates = compatibilityEntries.length > 0
+        ? collectLegacyAuxiliaryFallback(
+            compatibilityEntries,
+            context.objectiveKey,
+            context.tag,
+            context.excludeIds || [],
+            skill
+        )
+        : [];
+
+    return deduplicateQuestions([...compatibilityCandidates, ...matches]);
+}
+
+function collectLegacyAuxiliaryFallback(poolEntries, objectiveKey, tag, excludeIds = [], skillKey = null){
+    const excludedIds = new Set(excludeIds || []);
+    const entries = Array.isArray(poolEntries) ? poolEntries : Object.entries(poolEntries || {});
+    const fallbackRecords = deduplicateQuestions(entries.flatMap(([, pool]) =>
+        (Array.isArray(pool) ? pool : []).filter(record =>
+            record && !excludedIds.has(record.id)
+        )
+    ));
+    const objectiveMatches = fallbackRecords.filter(record => inferObjective(record) === objectiveKey);
+    if(objectiveMatches.length > 0) return objectiveMatches;
+    const tagMatches = fallbackRecords.filter(record => record.tag === tag);
+    if(tagMatches.length > 0) return tagMatches;
+    return fallbackRecords;
+}
+
 function getRetestPoolName(){
     if(room <= 9) return "easy";
     if(room <= 19) return "medium";
@@ -4350,32 +4483,49 @@ function getRemediationQuestion(state){
     const excludeIds = [state.originQuestionId].filter(Boolean);
 
     if(state.stage === "repair"){
-        if(state.skill && microSkillRepairPools[state.skill]){
-            const skillRepairPool = microSkillRepairPools[state.skill] || [];
-            const skillRepairCandidates = getQuestionsMatchingNeed(
-                skillRepairPool,
+        const routedRepairPool = state.skill && typeof directSkillRepairRoutes !== "undefined"
+            ? directSkillRepairRoutes[state.skill]
+            : null;
+        const hasRoutedRepairPool = Array.isArray(routedRepairPool) && routedRepairPool.length > 0;
+        const repairDirectEntries = hasRoutedRepairPool
+            ? [[state.skill, routedRepairPool]]
+            : (state.skill && Array.isArray(microSkillRepairPools?.[state.skill])
+                ? [[state.skill, microSkillRepairPools[state.skill]]]
+                : []);
+        const repairEntries = [
+            ...repairDirectEntries,
+            ...Object.entries(microSkillRepairPools || {})
+        ];
+        let repairCandidates = collectAuxiliaryCandidates(
+            repairEntries,
+            state.skill,
+            {
+                excludeIds,
+                compatibilityEntries: hasRoutedRepairPool ? repairDirectEntries : [],
+                objectiveKey: state.objective,
+                tag: state.tag
+            }
+        );
+
+        if(repairCandidates.length === 0){
+            repairCandidates = collectLegacyAuxiliaryFallback(
+                repairDirectEntries,
                 state.objective,
                 state.tag,
                 excludeIds,
                 state.skill
             );
-
-            if(skillRepairCandidates.length > 0){
-                return weightedPick(skillRepairCandidates, {
-                    mode: "support",
-                    purpose: "repair"
-                });
-            }
         }
 
-        const allRepairPool = Object.values(microSkillRepairPools).reduce((all, pool) => all.concat(pool), []);
-        const repairCandidates = getQuestionsMatchingNeed(
-            allRepairPool,
-            state.objective,
-            state.tag,
-            excludeIds,
-            state.skill
-        );
+        if(repairCandidates.length === 0){
+            repairCandidates = collectLegacyAuxiliaryFallback(
+                Object.entries(microSkillRepairPools || {}),
+                state.objective,
+                state.tag,
+                excludeIds,
+                state.skill
+            );
+        }
 
         if(repairCandidates.length > 0){
             return weightedPick(repairCandidates, {
@@ -4386,34 +4536,35 @@ function getRemediationQuestion(state){
     }
 
     if(state.stage === "bridge"){
-        if(state.skill && microSkillBridgePools[state.skill]){
-            const skillBridgePool = microSkillBridgePools[state.skill] || [];
-            const skillBridgeCandidates = getQuestionsMatchingNeed(
-                skillBridgePool,
+        const bridgeEntries = Object.entries(microSkillBridgePools || {});
+        const bridgeDirectEntries = state.skill && Array.isArray(microSkillBridgePools?.[state.skill])
+            ? [[state.skill, microSkillBridgePools[state.skill]]]
+            : [];
+        let bridgeCandidates = collectAuxiliaryCandidates(
+            bridgeEntries,
+            state.skill,
+            { excludeIds }
+        );
+
+        if(bridgeCandidates.length === 0){
+            bridgeCandidates = collectLegacyAuxiliaryFallback(
+                bridgeDirectEntries,
                 state.objective,
                 state.tag,
                 excludeIds,
                 state.skill
             );
-
-            if(skillBridgeCandidates.length > 0){
-                return weightedPick(skillBridgeCandidates, {
-                    mode: "support",
-                    purpose: "confirm"
-                });
-            }
         }
 
-        const allBridgePool = Object.values(microSkillBridgePools || {})
-            .reduce((all, pool) => all.concat(pool), []);
-
-        const bridgeCandidates = getQuestionsMatchingNeed(
-            allBridgePool,
-            state.objective,
-            state.tag,
-            excludeIds,
-            state.skill
-        );
+        if(bridgeCandidates.length === 0){
+            bridgeCandidates = collectLegacyAuxiliaryFallback(
+                bridgeEntries,
+                state.objective,
+                state.tag,
+                excludeIds,
+                state.skill
+            );
+        }
 
         if(bridgeCandidates.length > 0){
             return weightedPick(bridgeCandidates, {
@@ -4433,7 +4584,6 @@ function getRemediationQuestion(state){
         state.skill
     );
 }
-
 function weightedPick(pool, options = {}){
     const {
         mode = "support",
@@ -4801,6 +4951,7 @@ showContinueButtonIfSaved();
 // - progression bugs
 // =============================================
 function startGame(shouldResume = false) {
+    restoreStabilizationProtocolGameplayShell();
     const hasSavedRun = shouldResume && modeAllowsSave() ? loadSavedGame() : false;
 
     if(hasSavedRun && gameMode === "standard"){
